@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from issue_keys import get_gitlab_repo, normalize_repo, repo_display_name
+from issue_keys import normalize_repo, repo_display_name
 
 
 class MissingGitlabRepoError(ValueError):

@@ -15,7 +15,7 @@ pip install -r requirements-dev.txt
 ## Variáveis de ambiente
 
 Todas têm default em `config.py`. Para o sync com o Supabase, use um `.env` na
-raiz do workspace (`mgi-workspace/.env`) — `sync_supabase._load_dotenv()` o
+raiz do workspace (`kpi-workspace/.env`) — `sync_supabase._load_dotenv()` o
 carrega automaticamente.
 
 | Variável | Default | Descrição |
@@ -74,7 +74,7 @@ python backfill_profile_gitlab_ids.py
 ```powershell
 $env:SUPABASE_URL = "https://xxx.supabase.co"
 $env:SUPABASE_SERVICE_ROLE_KEY = "eyJ..."
-cd D:\mgi-workspace\kpi-pipeline
+cd D:\kpi-workspace\kpi-pipeline
 python sync_supabase.py
 ```
 
@@ -109,7 +109,7 @@ Supabase ou `supabase db push`. Ver detalhes do contrato em
 
 | Sintoma | Causa provável | Ação |
 |---------|----------------|------|
-| `Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY` | `.env` ausente/incompleto | Preencher `mgi-workspace/.env`. |
+| `Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY` | `.env` ausente/incompleto | Preencher `kpi-workspace/.env`. |
 | `Nenhum token GitLab definido` | sem `GITLAB_TOKEN*` | Definir token; ou rodar só o sync com JSON existente. |
 | `AVISO: ... DADOS DE TESTE` | JSON sintético no lugar do real | Rodar `atualizar_gitlab_issues.py` com token válido. |
 | Coleta Git vazia | `MGI_REPOS` vazio ou paths inacessíveis | Definir `MGI_REPOS` no `.env` (ver `.env.example`); o pipeline segue sem Git. |

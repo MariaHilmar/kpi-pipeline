@@ -125,6 +125,9 @@ def _fake_records() -> list[dict]:
     return [
         {
             "issue_key": "Contratos v2:42",
+            "gitlab_repo": "Contratos v2",
+            "gitlab_iid": 42,
+            "titulo": "[PNCP] (PNCP) - Teste sync",
             "synced_at": "2025-06-01T12:00:00Z",
             "_participants": [],
             "_gitlab_user_meta": [],
@@ -150,6 +153,9 @@ class _FakeSyncClient:
 
     def upsert_releases(self, rows: list) -> int:
         return len(rows)
+
+    def reconcile_phantom_duplicates(self, source) -> int:
+        return 0
 
     def finish_sync_run(
         self,

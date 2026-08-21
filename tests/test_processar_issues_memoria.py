@@ -62,11 +62,11 @@ def test_issue_key_usa_nome_de_exibicao_contratos_v1():
     assert rec["repositorio"] == "Contratos v1"
 
 
-def test_repo_default_quando_ausente():
+def test_repo_ausente_retorna_none():
     issue = _issue()
     del issue["gitlab_repo"]
     rec = p.build_issue_record(issue, today=date(2025, 3, 1))
-    assert rec["issue_key"] == "Contratos v2:1338"
+    assert rec is None
 
 
 def test_campos_manuais_omitidos():

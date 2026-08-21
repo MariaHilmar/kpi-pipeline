@@ -4,15 +4,15 @@
 
 | Item | Valor |
 |------|-------|
-| Script agendado | `executar_pipeline_silent.bat` (raiz do workspace) |
-| Horario padrao | 08:10 (diario) |
+| Script agendado | `kpi-pipeline/executar_pipeline_silent.bat` |
+| Horarios padrao | 08:10, 10:00, 12:00, 14:00, 16:00, 18:00 (diario) |
 | Tarefa | `MGI-Pipeline-Supabase` |
 | Logs | `logs/scheduled_YYYYMMDD_HHMMSS.log` e `logs/pipeline.log` |
 
 O modo silencioso roda o fluxo incremental completo (atualizado com leitura de epicos via Parent):
 
 1. **Sync incremental** de issues (`atualizar_gitlab_issues.py --incremental`)
-   - Carrega `mgi-workspace/.env`
+   - Carrega `kpi-workspace/.env`
    - Usa `GITLAB_TOKEN` global para `contratos_v2` e `contratos`
    - Retry automatico em timeout da API GitLab
 2. **Coleta Git + sync Supabase** (`pipeline_maestro.py`)
@@ -26,19 +26,19 @@ Pull condicional dos repos Git (ter/qui): `executar_pull_repos.bat` (tarefa `MGI
 ## Configurar (uma vez)
 
 1. Garanta `.env` na raiz do workspace com `GITLAB_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
-2. Duplo-clique em **`agendar.bat`** (pede admin).
+2. Duplo-clique em **`kpi-pipeline\agendar.bat`** (pede admin).
 3. Confirme horario e teste opcional.
 
 Ou via PowerShell (admin):
 
 ```powershell
-cd D:\mgi-workspace\kpi-pipeline
-.\agendar_task_scheduler.ps1 -Time "08:10" -Force -Test
+cd D:\kpi-workspace\kpi-pipeline
+.\agendar_task_scheduler.ps1 -Force -Test
 ```
 
 ## Remover agendamento
 
-Duplo-clique em **`desagendar.bat`** ou:
+Duplo-clique em **`kpi-pipeline\desagendar.bat`** ou:
 
 ```powershell
 .\desagendar_task_scheduler.ps1
@@ -53,8 +53,17 @@ Duplo-clique em **`desagendar.bat`** ou:
 ## Verificar execucoes
 
 - **Task Scheduler:** `taskschd.msc` -> `MGI-Pipeline-Supabase` -> Historico.
-- **Logs:** pasta `D:\mgi-workspace\logs\`.
+- **Logs:** pasta `D:\kpi-workspace\logs\`.
+- **Diagnostico rapido:** `kpi-pipeline\verificar_pipeline.bat` (mostra status da ultima execucao e valida caminho da tarefa agendada).
+
+Se o workspace foi movido/renomeado (ex.: `mgi-workspace` -> `kpi-workspace`), rode **`kpi-pipeline\agendar.bat`** novamente como administrador para atualizar o caminho no Task Scheduler.
 
 ## Ajustar horario
 
-Remova e recrie com `-Time "09:30"`, ou edite o gatilho em `taskschd.msc`.
+Remova e recrie com horarios customizados, por exemplo:
+
+```powershell
+.\agendar_task_scheduler.ps1 -Force -Times "08:10","10:00","12:00","14:00","16:00","18:00"
+```
+
+Ou edite os gatilhos em `taskschd.msc`.

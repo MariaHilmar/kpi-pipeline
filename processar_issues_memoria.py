@@ -19,7 +19,8 @@ from typing import Any
 
 import issue_fields
 from gitlab_identities import enrich_records_with_developer_ids
-from issue_keys import get_gitlab_repo, repo_display_name
+from issue_keys import repo_display_name
+from issue_repo_validation import MissingGitlabRepoError, require_gitlab_repo
 from logging_utils import get_logger
 
 log = get_logger(__name__)
@@ -279,7 +280,11 @@ def build_issue_record(
     synced_at = synced_at or _utc_now_iso()
     title = issue.get("title", "") or ""
 
-    repo_slug = get_gitlab_repo(issue)
+    try:
+        repo_slug = require_gitlab_repo(issue)
+    except MissingGitlabRepoError as exc:
+        log.warning(f"AVISO - {exc}")
+        return None
     repo_label = repo_display_name(repo_slug)
     issue_key = f"{repo_label}:{gitlab_iid}"
 

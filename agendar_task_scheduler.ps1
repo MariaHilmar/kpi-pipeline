@@ -4,7 +4,7 @@
     Agenda execucao diaria do pipeline MGI (GitLab -> Supabase) no Task Scheduler.
 
 .PARAMETER Times
-    Horarios diarios no formato HH:mm (padrao 08:00, 11:00, 15:00, 18:00).
+    Horarios diarios no formato HH:mm (padrao 08:10, 10:00, 12:00, 14:00, 16:00, 18:00).
     Cria um trigger por horario na mesma tarefa.
 
 .PARAMETER Test
@@ -14,7 +14,7 @@
     Substitui a tarefa existente sem perguntar.
 #>
 param(
-    [string[]]$Times = @("08:00", "11:00", "15:00", "18:00"),
+    [string[]]$Times = @("08:10", "10:00", "12:00", "14:00", "16:00", "18:00"),
     [switch]$Test,
     [switch]$Force
 )
@@ -41,7 +41,8 @@ if (-not $principalCheck.IsInRole([Security.Principal.WindowsBuiltInRole]::Admin
 }
 
 $WORKSPACE_DIR = Split-Path -Parent $PSScriptRoot
-$BATCH_FILE = Join-Path $WORKSPACE_DIR "executar_pipeline_silent.bat"
+& (Join-Path $PSScriptRoot "ensure_workspace_compat.ps1") -WorkspaceDir $WORKSPACE_DIR | Out-Null
+$BATCH_FILE = Join-Path $PSScriptRoot "executar_pipeline_silent.bat"
 $TASK_NAME = "MGI-Pipeline-Supabase"
 $RUN_AS_USER = "$env:USERDOMAIN\$env:USERNAME"
 

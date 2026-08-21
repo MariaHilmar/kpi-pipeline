@@ -35,7 +35,6 @@ from gitlab_identities import (
     build_participant_rows,
     collect_gitlab_users_from_records,
     group_rows_by_postgrest_keys,
-    issue_keys_from_records,
     prepare_issue_rows_for_upsert,
 )
 from gitlab_labels import (
@@ -45,6 +44,12 @@ from gitlab_labels import (
 )
 from issue_filters import filtrar_issues_fechadas_antigas, parse_issue_datetime
 from issue_keys import get_gitlab_repo, normalize_repo
+from issue_repo_validation import (
+    IssueSourceIndex,
+    filter_records_by_source,
+    find_phantom_issue_keys,
+    reject_cross_repo_title_conflicts,
+)
 from logging_utils import get_logger
 from processar_issues_memoria import build_issue_records, resolve_enable_git
 
@@ -215,6 +220,113 @@ class SupabaseSync:
                 total += len(chunk)
                 log.info(f"OK - Enviadas {total}/{len(rows)} issues")
         return total
+
+    def fetch_issues_v1_v2(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        offset = 0
+        while True:
+            response = requests.get(
+                f"{self.base}/issues",
+                headers=self.headers,
+                params={
+                    "select": "issue_key,gitlab_repo,gitlab_iid,titulo",
+                    "gitlab_repo": "in.(Contratos v1,Contratos v2)",
+                    "order": "gitlab_iid.asc",
+                    "offset": offset,
+                    "limit": 1000,
+                },
+                timeout=120,
+            )
+            response.raise_for_status()
+            chunk = response.json()
+            if not chunk:
+                break
+            rows.extend(chunk)
+            offset += 1000
+        return rows
+
+    def delete_issues_by_keys(self, issue_keys: list[str]) -> int:
+        if not issue_keys:
+            return 0
+        deleted = 0
+        chunk_size = 100
+        for start in range(0, len(issue_keys), chunk_size):
+            batch = issue_keys[start : start + chunk_size]
+            keys_filter = f"in.({','.join(json.dumps(key) for key in batch)})"
+            response = requests.delete(
+                f"{self.base}/issues?issue_key={keys_filter}",
+                headers=self.headers,
+                timeout=120,
+            )
+            if not response.ok:
+                detail = response.text[:500]
+                raise RuntimeError(
+                    f"Erro ao remover issues fantasmas ({response.status_code}): {detail}"
+                )
+            deleted += len(batch)
+        return deleted
+
+    def delete_milestone_issues_by_keys(self, issue_keys: list[str]) -> int:
+        if not issue_keys:
+            return 0
+        removed = 0
+        chunk_size = 100
+        for start in range(0, len(issue_keys), chunk_size):
+            batch = issue_keys[start : start + chunk_size]
+            keys_filter = f"in.({','.join(json.dumps(key) for key in batch)})"
+            response = requests.delete(
+                f"{self.base}/milestone_issues?issue_key={keys_filter}",
+                headers=self.headers,
+                timeout=120,
+            )
+            if response.ok:
+                removed += len(batch)
+        return removed
+
+    def delete_epic_links_for_repo_iids(
+        self,
+        repo_label: str,
+        iids: list[int],
+    ) -> int:
+        if not iids:
+            return 0
+        removed = 0
+        chunk_size = 100
+        for start in range(0, len(iids), chunk_size):
+            batch = iids[start : start + chunk_size]
+            iids_filter = f"in.({','.join(str(i) for i in batch)})"
+            response = requests.delete(
+                f"{self.base}/gitlab_epic_issue_links"
+                f"?gitlab_repo=eq.{repo_label}&gitlab_iid={iids_filter}",
+                headers=self.headers,
+                timeout=120,
+            )
+            if response.ok:
+                removed += len(batch)
+        return removed
+
+    def reconcile_phantom_duplicates(self, source: IssueSourceIndex) -> int:
+        """Remove linhas fantasmas v1+v2 com mesmo titulo confirmadas pela fonte."""
+        db_rows = self.fetch_issues_v1_v2()
+        phantom_keys = find_phantom_issue_keys(db_rows, source)
+        if not phantom_keys:
+            return 0
+
+        phantom_iids_by_repo: dict[str, list[int]] = {}
+        for key in phantom_keys:
+            if ":" not in key:
+                continue
+            repo_label, iid_str = key.split(":", 1)
+            if not iid_str.isdigit():
+                continue
+            phantom_iids_by_repo.setdefault(repo_label, []).append(int(iid_str))
+
+        self.delete_milestone_issues_by_keys(phantom_keys)
+        for repo_label, iids in phantom_iids_by_repo.items():
+            self.delete_epic_links_for_repo_iids(repo_label, iids)
+        removed = self.delete_issues_by_keys(phantom_keys)
+        log.info(f"OK - {removed} issues fantasmas removidas na reconciliacao")
+        return removed
 
     def upsert_releases(self, rows: list[dict[str, Any]]) -> int:
         if not rows:
@@ -500,6 +612,34 @@ def _epic_links_from_json(issues: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return links
 
 
+def _apply_repo_safeguards(
+    rows: list[dict[str, Any]],
+    source_issues: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Valida repo/titulo contra a fonte e bloqueia duplicatas cross-repo."""
+    source = IssueSourceIndex.from_issues(source_issues)
+    rows, skipped_source = filter_records_by_source(rows, source)
+    if skipped_source:
+        log.warning(
+            f"AVISO - {len(skipped_source)} issues ignoradas por inconsistencia com a fonte GitLab"
+        )
+        for msg in skipped_source[:5]:
+            log.warning(f"  - {msg}")
+        if len(skipped_source) > 5:
+            log.warning(f"  - ... e mais {len(skipped_source) - 5}")
+
+    rows, rejected = reject_cross_repo_title_conflicts(rows, source)
+    if rejected:
+        log.warning(
+            f"AVISO - {len(rejected)} issues rejeitadas por conflito cross-repo (IID+titulo)"
+        )
+        for msg in rejected[:5]:
+            log.warning(f"  - {msg}")
+        if len(rejected) > 5:
+            log.warning(f"  - ... e mais {len(rejected) - 5}")
+    return rows
+
+
 def sync_issues_to_supabase(
     issues: list[dict[str, Any]] | None = None,
     *,
@@ -518,7 +658,7 @@ def sync_issues_to_supabase(
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
     if not url or not key:
         raise SystemExit(
-            "Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY em .env na raiz do workspace (mgi-workspace/.env)"
+            "Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY em .env na raiz do workspace (kpi-workspace/.env)"
         )
 
     if issues is None:
@@ -562,12 +702,21 @@ def sync_issues_to_supabase(
 
     raw_records = build_issue_records(issues, enable_git=git_enabled)
     synced_at = raw_records[0]["synced_at"] if raw_records else _utc_now()
-    gitlab_users = collect_gitlab_users_from_records(raw_records, synced_at)
     participant_rows = build_participant_rows(raw_records)
     rows = prepare_issue_rows_for_upsert(raw_records)
-    issue_keys = issue_keys_from_records(raw_records)
+    rows = _apply_repo_safeguards(rows, issues)
+    allowed_keys = {row["issue_key"] for row in rows}
+    issue_keys = [row["issue_key"] for row in rows]
+    participant_rows = [
+        row for row in participant_rows if row.get("issue_key") in allowed_keys
+    ]
+    gitlab_users = collect_gitlab_users_from_records(
+        [r for r in raw_records if r.get("issue_key") in allowed_keys],
+        synced_at,
+    )
     log.info(f"OK - {len(rows)} issues unicas preparadas")
 
+    source_index = IssueSourceIndex.from_issues(issues)
     client = SupabaseSync(url, key)
     run_id: str | None = None
     try:
@@ -582,6 +731,11 @@ def sync_issues_to_supabase(
         upserted = client.upsert_issues(rows)
         participant_count = client.replace_issue_participants(issue_keys, participant_rows)
         log.info(f"OK - {participant_count} participantes de issues sincronizados")
+        if not _env_truthy("MGI_SKIP_PHANTOM_RECONCILE"):
+            try:
+                client.reconcile_phantom_duplicates(source_index)
+            except Exception as exc:
+                log.warning(f"AVISO - reconciliacao de fantasmas ignorada ({exc})")
         release_count = 0
         if include_releases:
             release_rows = _dedupe_releases(_load_releases(_git_data_path()))

@@ -55,7 +55,8 @@ if (-not $principalCheck.IsInRole([Security.Principal.WindowsBuiltInRole]::Admin
 }
 
 $WORKSPACE_DIR = Split-Path -Parent $PSScriptRoot
-$BATCH_FILE = Join-Path $WORKSPACE_DIR "executar_pull_repos.bat"
+& (Join-Path $PSScriptRoot "ensure_workspace_compat.ps1") -WorkspaceDir $WORKSPACE_DIR | Out-Null
+$BATCH_FILE = Join-Path $PSScriptRoot "executar_pull_repos.bat"
 $TASK_NAME = "MGI-Pull-Repos-Main"
 $RUN_AS_USER = "$env:USERDOMAIN\$env:USERNAME"
 $dayLabels = if ($Frequency -eq "Monthly") { "dia $DayOfMonth de cada mes" } else { ($DaysOfWeek | ForEach-Object { $_.ToString() }) -join ", " }

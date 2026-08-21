@@ -28,7 +28,7 @@ Se ainda existir uma cópia no GitLab, pode ser arquivada ou ignorada; não é n
 Se o seu clone ainda aponta para o GitLab como `origin`, alinhe ao GitHub:
 
 ```powershell
-cd D:\mgi-workspace\kpi-pipeline
+cd D:\kpi-workspace\kpi-pipeline
 git remote -v
 git remote set-url origin https://github.com/MariaHilmar/kpi-pipeline.git
 # Opcional: manter GitLab como remote secundário

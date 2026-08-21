@@ -58,7 +58,7 @@ Ja implementado (nao reverter):
 ## Fluxo recomendado pos-implementacao
 
 ```powershell
-cd D:\mgi-workspace\kpi-pipeline
+cd D:\kpi-workspace\kpi-pipeline
 
 # Publicacao completa (primeira vez ou recuperacao)
 python publicar_kpi.py --full --sem-merge-dates

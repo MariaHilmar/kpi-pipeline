@@ -171,9 +171,15 @@ Todas opcionais (têm default em `config.py`). Para o sync, use um `.env` na rai
 
 ---
 
-## Agendamento (opcional — Windows)
+## Implantacao e agendamento
 
-Para execução diária automática no **Windows Task Scheduler**, use `agendar_task_scheduler.ps1` / `desagendar_task_scheduler.ps1`. Não é necessário para desenvolvimento nem para o repositório público. Detalhes em [docs/05-agendamento.md](docs/05-agendamento.md).
+Tutorial (Supabase, Vercel, pipeline no **Railway** ou no **Windows** com arquivos `.bat`): [docs/TUTORIAL-IMPLANTACAO.md](docs/TUTORIAL-IMPLANTACAO.md).
+
+Atalhos Windows (`.bat`) ficam **nesta pasta** (`agendar.bat`, `executar_pipeline.bat`, etc.).
+
+### Agendamento (opcional - Windows)
+
+Para execução diária automática no **Windows Task Scheduler**, duplo clique em `agendar.bat` (admin) ou use `agendar_task_scheduler.ps1`. Detalhes em [docs/05-agendamento.md](docs/05-agendamento.md).
 
 ---
 

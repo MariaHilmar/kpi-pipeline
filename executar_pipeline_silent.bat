@@ -157,12 +157,10 @@ if not "%~2"=="" set "RUN_ARGLINE=%~2"
 if not "%~3"=="" set "RUN_ARGLINE=!RUN_ARGLINE! %~3"
 if not "%~4"=="" set "RUN_ARGLINE=!RUN_ARGLINE! %~4"
 if not "%~5"=="" set "RUN_ARGLINE=!RUN_ARGLINE! %~5"
-powershell -NoProfile -ExecutionPolicy Bypass -File "!TEE_PS1!" ^
-    -PythonExe "!PYTHON_EXE!" ^
-    -WorkingDirectory "!PIPELINE_DIR!" ^
-    -LogFile "!LOG_FILE!" ^
-    -Script "!RUN_SCRIPT!" ^
-    -ScriptArgLine "!RUN_ARGLINE!"
+REM Barra invertida no fim do path + aspas fecha o argumento cedo no PowerShell.
+set "TEE_WD=!PIPELINE_DIR!"
+if "!TEE_WD:~-1!"=="\" set "TEE_WD=!TEE_WD:~0,-1!"
+powershell -NoProfile -ExecutionPolicy Bypass -File "!TEE_PS1!" -PythonExe "!PYTHON_EXE!" -WorkingDirectory "!TEE_WD!" -LogFile "!LOG_FILE!" -Script "!RUN_SCRIPT!" -ScriptArgLine "!RUN_ARGLINE!"
 set "RUN_EXIT=!ERRORLEVEL!"
 exit /b !RUN_EXIT!
 

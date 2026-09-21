@@ -191,7 +191,7 @@ O site so mostra o que ja esta no Supabase. Alguem precisa rodar o pipeline com 
 
 | Opcao | Quando usar | Limitacao |
 |-------|-------------|-----------|
-| **A - Railway** | Querer o robo na nuvem, sem deixar o PC ligado | Nao usa WSL. Commits/branches locais ficam desligados (`MGI_FAST_REPO_SYNC=1`). Issues e metadados via API GitLab funcionam. |
+| **A - Railway** | Querer o robo na nuvem, sem deixar o PC ligado | Nao usa WSL. Commits/branches locais ficam desligados (`KPI_FAST_REPO_SYNC=1`). Issues e metadados via API GitLab funcionam. |
 | **B - Windows local** | Ter um PC que fica ligado nos horarios, ou precisar da coleta Git via WSL | O computador precisa estar ligado (ou acordar) no horario da tarefa. |
 
 Voce pode usar **so uma** das opcoes. Nao rode Railway e o agendamento local no mesmo horario, para nao gravar duas vezes o mesmo lote.
@@ -224,13 +224,13 @@ Em **Variables** do servico, cadastre:
 | `GITLAB_URL` | Ex.: `https://gitlab.com` ou a URL do seu GitLab |
 | `GITLAB_TOKEN` | Token criado acima |
 | `GITLAB_GROUP_PATH` | Grupo dos epicos no GitLab, se usar (o caminho do **seu** grupo) |
-| `MGI_FAST_REPO_SYNC` | `1` |
-| `MGI_ALL_MODULES` | `1` |
-| `MGI_CLOSED_EXCLUDE_DAYS` | `0` (mantem historico) |
+| `KPI_FAST_REPO_SYNC` | `1` |
+| `KPI_ALL_MODULES` | `1` |
+| `KPI_CLOSED_EXCLUDE_DAYS` | `0` (mantem historico) |
 | `DASHBOARD_URL` | URL do **seu** site na Vercel, sem barra no final (ex.: `https://SEU-PROJETO.vercel.app`) |
 | `REVALIDATE_SECRET` | **Igual** ao da Vercel |
 
-Nao coloque clones Git locais (`MGI_REPOS` / WSL): no Railway isso nao existe.
+Nao coloque clones Git locais (`KPI_REPOS` / WSL): no Railway isso nao existe.
 
 ### 3A.4 Comando de start (o que o Railway executa)
 
@@ -316,10 +316,10 @@ Abra a pasta **`kpi-pipeline`** (nao a raiz do workspace) e use duplo clique. A 
 | `executar_pipeline.bat` | **Dia a dia.** Menu: incremental (opcoes 1 ou 3), silencioso (2) ou execucao completa (4). |
 | `executar_pipeline_silent.bat` | Mesmo fluxo incremental **sem perguntar nada**. E o arquivo que o agendador do Windows chama. |
 | `executar_pipeline_completo.bat` | Recarrega issues no modo full e reprocessa metadados. Use se algo ficou inconsistente. |
-| `executar_pipeline_todos_modulos.bat` | Incremental incluindo todos os modulos (`MGI_ALL_MODULES=1`). |
-| `agendar.bat` | Cria a tarefa automatica **MGI-Pipeline-Supabase**. Pede permissao de administrador. Horarios padrao: **08:10, 10:00, 12:00, 14:00, 16:00 e 18:00** (horario do Windows). |
+| `executar_pipeline_todos_modulos.bat` | Incremental incluindo todos os modulos (`KPI_ALL_MODULES=1`). |
+| `agendar.bat` | Cria a tarefa automatica **KPI-Pipeline-Supabase**. Pede permissao de administrador. Horarios padrao: **08:10, 10:00, 12:00, 14:00, 16:00 e 18:00** (horario do Windows). |
 | `desagendar.bat` | Remove essa tarefa automatica. Tambem pede administrador. |
-| `agendar_pull_repos.bat` | Agenda o pull dos repositorios Git locais (tarefa **MGI-Pull-Repos-Main**). Util se voce coleta commits via WSL. Padrao: dia 1 de cada mes as 09:00. |
+| `agendar_pull_repos.bat` | Agenda o pull dos repositorios Git locais (tarefa **KPI-Pull-Repos-Main**). Util se voce coleta commits via WSL. Padrao: dia 1 de cada mes as 09:00. |
 | `desagendar_pull_repos.bat` | Remove o agendamento de pull. |
 | `executar_pull_repos.bat` | Roda o pull **agora**, sem esperar o calendario. |
 | `verificar_pipeline.bat` | Mostra se a ultima execucao deu certo e se a tarefa agendada aponta para a pasta certa. |
@@ -345,13 +345,13 @@ Ordem sugerida na primeira vez:
 
 O que fica agendado:
 
-- **Nome da tarefa:** `MGI-Pipeline-Supabase`
+- **Nome da tarefa:** `KPI-Pipeline-Supabase`
 - **Script:** `kpi-pipeline\executar_pipeline_silent.bat`
 - **Logs:** pasta `logs\` (arquivos `scheduled_AAAAAMMDD_HHMMSS.log`)
 
 O PC precisa estar **ligado** (ou acordar) nesses horarios. A tarefa usa a **sua conta** do Windows, para ler o `.env`.
 
-Para mudar os horarios depois: duplo clique em `desagendar.bat`, depois `agendar.bat` de novo, ou abra o Agendador (`Win + R`, digite `taskschd.msc`, Enter) e edite os gatilhos de `MGI-Pipeline-Supabase`.
+Para mudar os horarios depois: duplo clique em `desagendar.bat`, depois `agendar.bat` de novo, ou abra o Agendador (`Win + R`, digite `taskschd.msc`, Enter) e edite os gatilhos de `KPI-Pipeline-Supabase`.
 
 Horarios customizados via PowerShell (como administrador):
 

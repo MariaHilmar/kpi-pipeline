@@ -20,18 +20,18 @@ carrega automaticamente.
 
 | Variável | Default | Descrição |
 |----------|---------|-----------|
-| `MGI_BASE_DIR` | pasta do workspace | Base para logs/JSON consolidado. |
-| `MGI_REPOS` | *(vazio)* | Clones Git locais: `path=repo_slug;path2=slug2`. Ver `.env.example`. |
-| `MGI_WSL_REPO_PATHS` | slugs MGI padrão | Caminhos WSL para detectores Git: `slug=/wsl/path;...`. |
-| `MGI_ISSUES_JSON` | `kpi-pipeline/gitlab_issues_raw.json` | Fonte das issues processadas. |
-| `MGI_GIT_DATA_JSON` | `<base>/gitlab_git_data.json` | Saída consolidada da coleta Git. |
-| `MGI_ALL_MODULES` | `1` | `1` = todos os módulos; `0` = só `Fiscalização`/`Fornecedor`. |
-| `MGI_CLOSED_EXCLUDE_DAYS` | `60` | Exclui issues fechadas há mais de N dias. |
-| `MGI_INITIAL_LOAD` | `0` | Carga inicial (inclui histórico, respeitando a data de corte). |
-| `MGI_FAST_REPO_SYNC` | `0` | `1` desliga os detectores Git (área/tipo/dev). |
-| `MGI_REFRESH_MODE` | `normal` | `full` reprocessa todos os metadados. |
-| `MGI_SINCE_DAYS` | `30` | Janela (dias) da coleta Git. |
-| `MGI_LOG_RETENTION_DAYS` | `5` | Retenção de logs/relatórios. |
+| `KPI_BASE_DIR` | pasta do workspace | Base para logs/JSON consolidado. |
+| `KPI_REPOS` | *(vazio)* | Clones Git locais: `path=repo_slug;path2=slug2`. Ver `.env.example`. |
+| `KPI_WSL_REPO_PATHS` | slugs padrao dos repositorios | Caminhos WSL para detectores Git: `slug=/wsl/path;...`. |
+| `KPI_ISSUES_JSON` | `kpi-pipeline/gitlab_issues_raw.json` | Fonte das issues processadas. |
+| `KPI_GIT_DATA_JSON` | `<base>/gitlab_git_data.json` | Saída consolidada da coleta Git. |
+| `KPI_ALL_MODULES` | `1` | `1` = todos os módulos; `0` = só `Fiscalização`/`Fornecedor`. |
+| `KPI_CLOSED_EXCLUDE_DAYS` | `60` | Exclui issues fechadas há mais de N dias. |
+| `KPI_INITIAL_LOAD` | `0` | Carga inicial (inclui histórico, respeitando a data de corte). |
+| `KPI_FAST_REPO_SYNC` | `0` | `1` desliga os detectores Git (área/tipo/dev). |
+| `KPI_REFRESH_MODE` | `normal` | `full` reprocessa todos os metadados. |
+| `KPI_SINCE_DAYS` | `30` | Janela (dias) da coleta Git. |
+| `KPI_LOG_RETENTION_DAYS` | `5` | Retenção de logs/relatórios. |
 | `GITLAB_URL` | `https://gitlab.com` | Base da API GitLab. |
 | `GITLAB_TOKEN` | vazio | Token global (fallback). |
 | `GITLAB_TOKEN_CONTRATOS_V2` / `GITLAB_TOKEN_CONTRATOS` | vazio | Tokens por repositório. |
@@ -39,7 +39,7 @@ carrega automaticamente.
 
 > A data de corte (`DEFAULT_CUTOFF_DATE = 01/01/2024`) e os projetos GitLab
 > (`GITLAB_PROJECTS`) são definidos em `config.py`. Os caminhos locais dos
-> clones Git (`REPOS`) vêm de `MGI_REPOS` no `.env`.
+> clones Git (`REPOS`) vêm de `KPI_REPOS` no `.env`.
 
 ## Execução
 
@@ -112,5 +112,5 @@ Supabase ou `supabase db push`. Ver detalhes do contrato em
 | `Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY` | `.env` ausente/incompleto | Preencher `kpi-workspace/.env`. |
 | `Nenhum token GitLab definido` | sem `GITLAB_TOKEN*` | Definir token; ou rodar só o sync com JSON existente. |
 | `AVISO: ... DADOS DE TESTE` | JSON sintético no lugar do real | Rodar `atualizar_gitlab_issues.py` com token válido. |
-| Coleta Git vazia | `MGI_REPOS` vazio ou paths inacessíveis | Definir `MGI_REPOS` no `.env` (ver `.env.example`); o pipeline segue sem Git. |
+| Coleta Git vazia | `KPI_REPOS` vazio ou paths inacessíveis | Definir `KPI_REPOS` no `.env` (ver `.env.example`); o pipeline segue sem Git. |
 | `Erro Supabase issues (4xx)` | schema desatualizado | Aplicar migrations pendentes. |

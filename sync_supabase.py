@@ -566,6 +566,12 @@ def _load_dotenv() -> None:
             value = value.strip().strip('"').strip("'")
             if key:
                 os.environ[key] = value
+        try:
+            import config as cfg
+
+            cfg.alias_legacy_mgi_env()
+        except ImportError:
+            pass
         log.info(f"OK - Variaveis carregadas de {path}")
         return
 
@@ -671,14 +677,14 @@ def sync_issues_to_supabase(
     git_enabled = resolve_enable_git(enable_git)
     if enable_git and not git_enabled:
         log.warning(
-            "AVISO - WSL/Git indisponivel ou MGI_FAST_REPO_SYNC=1. "
+            "AVISO - WSL/Git indisponivel ou KPI_FAST_REPO_SYNC=1. "
             "Usando titulo/labels (sem detectores Git).",
         )
     log.info(f"OK - Processando {len(issues)} issues em memoria")
 
     epic_rows: list[dict[str, Any]] = []
     epic_links: list[dict[str, Any]] = []
-    skip_epic_api = _env_truthy("MGI_SKIP_EPIC_API") or _env_truthy("MGI_PIPELINE_SCHEDULED")
+    skip_epic_api = _env_truthy("KPI_SKIP_EPIC_API") or _env_truthy("KPI_PIPELINE_SCHEDULED")
     if include_epics:
         epic_rows = _prepare_epics_for_sync(issues)
         if epic_rows:
@@ -731,7 +737,7 @@ def sync_issues_to_supabase(
         upserted = client.upsert_issues(rows)
         participant_count = client.replace_issue_participants(issue_keys, participant_rows)
         log.info(f"OK - {participant_count} participantes de issues sincronizados")
-        if not _env_truthy("MGI_SKIP_PHANTOM_RECONCILE"):
+        if not _env_truthy("KPI_SKIP_PHANTOM_RECONCILE"):
             try:
                 client.reconcile_phantom_duplicates(source_index)
             except Exception as exc:

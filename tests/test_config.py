@@ -32,10 +32,10 @@ class TestParsePathRepoPairs:
 
 class TestParseRepoPathMap:
     def test_mapa_wsl(self) -> None:
-        raw = "contratos_v2=/root/MGI/contratos_v2;contratos=/root/MGI/contratos"
+        raw = "contratos_v2=/root/kpi/contratos_v2;contratos=/root/kpi/contratos"
         assert config._parse_repo_path_map(raw) == {
-            "contratos_v2": "/root/MGI/contratos_v2",
-            "contratos": "/root/MGI/contratos",
+            "contratos_v2": "/root/kpi/contratos_v2",
+            "contratos": "/root/kpi/contratos",
         }
 
     def test_vazio(self) -> None:
@@ -58,6 +58,20 @@ class TestGitlabTokenForRepo:
         assert config.gitlab_token_for_repo("contratos") == "v1-only"
 
 
+class TestAliasLegacyMgiEnv:
+    def test_copia_mgi_quando_kpi_ausente(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("KPI_CLOSED_EXCLUDE_DAYS", raising=False)
+        monkeypatch.setenv("MGI_CLOSED_EXCLUDE_DAYS", "15")
+        config.alias_legacy_mgi_env()
+        assert os.environ["KPI_CLOSED_EXCLUDE_DAYS"] == "15"
+
+    def test_nao_sobrescreve_kpi_ja_definido(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("KPI_CLOSED_EXCLUDE_DAYS", "30")
+        monkeypatch.setenv("MGI_CLOSED_EXCLUDE_DAYS", "15")
+        config.alias_legacy_mgi_env()
+        assert os.environ["KPI_CLOSED_EXCLUDE_DAYS"] == "30"
+
+
 class TestApplyPipelineRuntimeFlags:
     def test_flags_ativam_env_e_modulo(self, monkeypatch: pytest.MonkeyPatch) -> None:
         import config as cfg
@@ -66,9 +80,9 @@ class TestApplyPipelineRuntimeFlags:
         old_all = cfg.ALL_MODULES
         old_refresh = cfg.REFRESH_MODE
         try:
-            monkeypatch.delenv("MGI_INITIAL_LOAD", raising=False)
-            monkeypatch.delenv("MGI_ALL_MODULES", raising=False)
-            monkeypatch.delenv("MGI_REFRESH_MODE", raising=False)
+            monkeypatch.delenv("KPI_INITIAL_LOAD", raising=False)
+            monkeypatch.delenv("KPI_ALL_MODULES", raising=False)
+            monkeypatch.delenv("KPI_REFRESH_MODE", raising=False)
             cfg.INITIAL_LOAD = False
             cfg.ALL_MODULES = False
             cfg.REFRESH_MODE = ""
@@ -79,9 +93,9 @@ class TestApplyPipelineRuntimeFlags:
                 full_refresh=True,
             )
 
-            assert os.environ["MGI_INITIAL_LOAD"] == "1"
-            assert os.environ["MGI_ALL_MODULES"] == "1"
-            assert os.environ["MGI_REFRESH_MODE"] == "full"
+            assert os.environ["KPI_INITIAL_LOAD"] == "1"
+            assert os.environ["KPI_ALL_MODULES"] == "1"
+            assert os.environ["KPI_REFRESH_MODE"] == "full"
             assert cfg.INITIAL_LOAD is True
             assert cfg.ALL_MODULES is True
             assert cfg.REFRESH_MODE == "full"
@@ -89,6 +103,6 @@ class TestApplyPipelineRuntimeFlags:
             cfg.INITIAL_LOAD = old_initial
             cfg.ALL_MODULES = old_all
             cfg.REFRESH_MODE = old_refresh
-            monkeypatch.delenv("MGI_INITIAL_LOAD", raising=False)
-            monkeypatch.delenv("MGI_ALL_MODULES", raising=False)
-            monkeypatch.delenv("MGI_REFRESH_MODE", raising=False)
+            monkeypatch.delenv("KPI_INITIAL_LOAD", raising=False)
+            monkeypatch.delenv("KPI_ALL_MODULES", raising=False)
+            monkeypatch.delenv("KPI_REFRESH_MODE", raising=False)

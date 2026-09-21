@@ -8,23 +8,23 @@ cd /d "%PROJECT_DIR%"
 set "PYTHON_EXE=python"
 
 rem Execucao COMPLETA: GitLab full + reprocessamento de metadados no Supabase
-set "MGI_REFRESH_MODE=full"
+set "KPI_REFRESH_MODE=full"
 :: RETENCAO: 0 = mantem historico (nao poda fechadas antigas). Alinhado a pipeline.
-set "MGI_CLOSED_EXCLUDE_DAYS=0"
+set "KPI_CLOSED_EXCLUDE_DAYS=0"
 :: HTTP GitLab: timeout baixo + paralelismo (alinhado ao .env e ao agendado).
-set "MGI_GITLAB_HTTP_TIMEOUT=25"
-set "MGI_GITLAB_HTTP_RETRIES=2"
-set "MGI_GITLAB_HTTP_RETRY_DELAY=3"
-set "MGI_GITLAB_MERGE_WORKERS=12"
-set "MGI_GITLAB_EPIC_WORKERS=12"
-set "MGI_GITLAB_GRAPHQL_TIMEOUT=30"
+set "KPI_GITLAB_HTTP_TIMEOUT=25"
+set "KPI_GITLAB_HTTP_RETRIES=2"
+set "KPI_GITLAB_HTTP_RETRY_DELAY=3"
+set "KPI_GITLAB_MERGE_WORKERS=12"
+set "KPI_GITLAB_EPIC_WORKERS=12"
+set "KPI_GITLAB_GRAPHQL_TIMEOUT=30"
 
 echo.
 echo ======================================================================
 echo  KPI Pipeline - EXECUCAO COMPLETA
 echo ======================================================================
 echo.
-echo  Modo: MGI_REFRESH_MODE=full
+echo  Modo: KPI_REFRESH_MODE=full
 echo  - GitLab: carga completa de issues --full
 echo  - Supabase: reprocessa metadados, labels, tipo e Dev/Git
 echo.
@@ -50,7 +50,7 @@ echo.
 
 echo [ETAPA 1] Coleta Git + sync Supabase + status_events - execucao completa
 echo ----------------------------------------------------------------------
-set "MGI_STATUS_EVENTS_INCREMENTAL=1"
+set "KPI_STATUS_EVENTS_INCREMENTAL=1"
 "%PYTHON_EXE%" -u pipeline_maestro.py --full
 set "RESULT=%ERRORLEVEL%"
 

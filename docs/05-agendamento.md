@@ -6,7 +6,7 @@
 |------|-------|
 | Script agendado | `kpi-pipeline/executar_pipeline_silent.bat` |
 | Horarios padrao | 08:10, 10:00, 12:00, 14:00, 16:00, 18:00 (diario) |
-| Tarefa | `MGI-Pipeline-Supabase` |
+| Tarefa | `KPI-Pipeline-Supabase` |
 | Logs | `logs/scheduled_YYYYMMDD_HHMMSS.log` e `logs/pipeline.log` |
 
 O modo silencioso roda o fluxo incremental completo (atualizado com leitura de epicos via Parent):
@@ -21,7 +21,7 @@ O modo silencioso roda o fluxo incremental completo (atualizado com leitura de e
 
 Sem menu interativo, sem `--full`, sem pausa no final.
 
-Pull condicional dos repos Git (ter/qui): `executar_pull_repos.bat` (tarefa `MGI-Pull-Repos-Main`).
+Pull condicional dos repos Git (ter/qui): `executar_pull_repos.bat` (tarefa `KPI-Pull-Repos-Main`).
 
 ## Configurar (uma vez)
 
@@ -52,11 +52,11 @@ Duplo-clique em **`kpi-pipeline\desagendar.bat`** ou:
 
 ## Verificar execucoes
 
-- **Task Scheduler:** `taskschd.msc` -> `MGI-Pipeline-Supabase` -> Historico.
+- **Task Scheduler:** `taskschd.msc` -> `KPI-Pipeline-Supabase` -> Historico.
 - **Logs:** pasta `D:\kpi-workspace\logs\`.
 - **Diagnostico rapido:** `kpi-pipeline\verificar_pipeline.bat` (mostra status da ultima execucao e valida caminho da tarefa agendada).
 
-Se o workspace foi movido/renomeado (ex.: `mgi-workspace` -> `kpi-workspace`), rode **`kpi-pipeline\agendar.bat`** novamente como administrador para atualizar o caminho no Task Scheduler.
+Se o workspace foi movido/renomeado (ex.: `kpi-workspace` -> `kpi-workspace`), rode **`kpi-pipeline\agendar.bat`** novamente como administrador para atualizar o caminho no Task Scheduler.
 
 ## Ajustar horario
 

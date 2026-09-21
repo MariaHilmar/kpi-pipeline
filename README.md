@@ -7,7 +7,7 @@
 
 Engenharia de dados e automação voltada para **monitoramento de performance de equipes de software**: um pipeline ETL que extrai issues e commits, aplica regras de negócio em memória (taxonomia, SLA, qualidade) e sincroniza com um backend Supabase que alimenta dashboards de BI.
 
-> **Aviso legal:** este é um projeto de **portfólio pessoal** demonstrando habilidades em ETL, orquestração e integração de APIs. **Não é um sistema oficial do MGI** ou de qualquer órgão público. O pipeline nasceu da experiência com dados do ecossistema **MGI** (issues GitLab, commits e KPIs de contratos), mas **não contém dados reais, tokens ou credenciais** — tudo é configurável via `.env`.
+> **Aviso legal:** este é um projeto de **portfólio pessoal** demonstrando habilidades em ETL, orquestração e integração de APIs. **Não é um sistema oficial** de qualquer órgão público. O pipeline nasceu da experiência com dados de gestão de contratos em issue trackers (issues GitLab, commits e KPIs), mas **não contém dados reais, tokens ou credenciais** - tudo é configurável via `.env`.
 
 ---
 
@@ -157,15 +157,15 @@ Todas opcionais (têm default em `config.py`). Para o sync, use um `.env` na rai
 
 | Variável | Default | Descrição |
 |----------|---------|-----------|
-| `MGI_BASE_DIR` | pasta do workspace | Base para logs/JSON. |
-| `MGI_REPOS` | *(vazio)* | Clones Git locais: `path=repo_slug;path2=slug2`. |
-| `MGI_WSL_REPO_PATHS` | slugs padrão | Caminhos WSL para `git log`: `slug=/wsl/path`. |
-| `MGI_ISSUES_JSON` | `gitlab_issues_raw.json` | Fonte das issues processadas. |
-| `MGI_ALL_MODULES` | `1` | `1` = todos os módulos; `0` = subconjunto. |
-| `MGI_CLOSED_EXCLUDE_DAYS` | `60` | Exclui issues fechadas há mais de N dias. |
-| `MGI_INITIAL_LOAD` | `0` | Carga inicial (inclui histórico). |
-| `MGI_FAST_REPO_SYNC` | `0` | `1` desliga detectores Git (usa só título/labels). |
-| `MGI_SINCE_DAYS` | `30` | Janela de coleta Git. |
+| `KPI_BASE_DIR` | pasta do workspace | Base para logs/JSON. |
+| `KPI_REPOS` | *(vazio)* | Clones Git locais: `path=repo_slug;path2=slug2`. |
+| `KPI_WSL_REPO_PATHS` | slugs padrão | Caminhos WSL para `git log`: `slug=/wsl/path`. |
+| `KPI_ISSUES_JSON` | `gitlab_issues_raw.json` | Fonte das issues processadas. |
+| `KPI_ALL_MODULES` | `1` | `1` = todos os módulos; `0` = subconjunto. |
+| `KPI_CLOSED_EXCLUDE_DAYS` | `60` | Exclui issues fechadas há mais de N dias. |
+| `KPI_INITIAL_LOAD` | `0` | Carga inicial (inclui histórico). |
+| `KPI_FAST_REPO_SYNC` | `0` | `1` desliga detectores Git (usa só título/labels). |
+| `KPI_SINCE_DAYS` | `30` | Janela de coleta Git. |
 | `GITLAB_URL` / `GITLAB_TOKEN` | `https://gitlab.com` / vazio | Integração GitLab (token nunca no código). |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | — | Necessárias para o sync com o Supabase. |
 

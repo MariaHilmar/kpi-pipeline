@@ -1,5 +1,5 @@
 @echo off
-REM Remove agendamento MGI-Pull-Repos-Main (requer admin)
+REM Remove agendamento KPI-Pull-Repos-Main (requer admin)
 setlocal
 call "%~dp0_kpi_workspace_dirs.bat"
 if errorlevel 1 exit /b 1

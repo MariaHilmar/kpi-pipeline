@@ -1,5 +1,5 @@
 @echo off
-REM Pipeline incremental agendado - Task Scheduler (MGI-Pipeline-Supabase)
+REM Pipeline incremental agendado - Task Scheduler (KPI-Pipeline-Supabase)
 REM
 REM Etapas (alinhado ao fluxo atual do pipeline):
 REM   0 - atualizar_gitlab_issues.py --incremental (GitLab -> JSON, .env + GITLAB_TOKEN)
@@ -20,26 +20,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%PIPELINE_DIR%ensure_worksp
 set "STATUS_PS1=%PIPELINE_DIR%\pipeline_run_status.ps1"
 set "TEE_PS1=%PIPELINE_DIR%\run_python_tee.ps1"
 set "PYTHON_EXE=python"
-set "MGI_PIPELINE_SCHEDULED=1"
-set "MGI_REFRESH_MODE=normal"
-set "MGI_INITIAL_LOAD=0"
+set "KPI_PIPELINE_SCHEDULED=1"
+set "KPI_REFRESH_MODE=normal"
+set "KPI_INITIAL_LOAD=0"
 :: RETENCAO: 0 = NAO poda issues fechadas antigas (mantem historico do KPI
 :: "Mergeadas por epoca"). Fixado aqui para nao depender do .env. O sync preserva
 :: epico/mergeado_em/dev ja validados (nao sobrescreve com vazio).
-set "MGI_CLOSED_EXCLUDE_DAYS=0"
-set "MGI_SYNC_STATUS_EVENTS=1"
-set "MGI_STATUS_EVENTS_INCREMENTAL=1"
-set "MGI_SYNC_DAILY_SNAPSHOT=1"
-set "MGI_LOG_RETENTION_DAYS=7"
+set "KPI_CLOSED_EXCLUDE_DAYS=0"
+set "KPI_SYNC_STATUS_EVENTS=1"
+set "KPI_STATUS_EVENTS_INCREMENTAL=1"
+set "KPI_SYNC_DAILY_SNAPSHOT=1"
+set "KPI_LOG_RETENTION_DAYS=7"
 :: HTTP GitLab: timeout BAIXO (falha rapido e re-tenta) + paralelismo evita que 1
 :: request travado segure um worker. Alinhado ao .env (fonte da verdade); o .env
 :: sobrescreve estes valores no load, mas os mantemos consistentes como fallback.
-set "MGI_GITLAB_HTTP_TIMEOUT=25"
-set "MGI_GITLAB_HTTP_RETRIES=2"
-set "MGI_GITLAB_HTTP_RETRY_DELAY=3"
-set "MGI_GITLAB_MERGE_WORKERS=12"
-set "MGI_GITLAB_EPIC_WORKERS=12"
-set "MGI_GITLAB_GRAPHQL_TIMEOUT=30"
+set "KPI_GITLAB_HTTP_TIMEOUT=25"
+set "KPI_GITLAB_HTTP_RETRIES=2"
+set "KPI_GITLAB_HTTP_RETRY_DELAY=3"
+set "KPI_GITLAB_MERGE_WORKERS=12"
+set "KPI_GITLAB_EPIC_WORKERS=12"
+set "KPI_GITLAB_GRAPHQL_TIMEOUT=30"
 
 if not exist "%PROJECT_DIR%logs" mkdir "%PROJECT_DIR%logs"
 
@@ -47,7 +47,7 @@ set "TS=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
 set "TS=!TS: =0!"
 set "LOG_FILE=%PROJECT_DIR%logs\scheduled_!TS!.log"
 
-set "MGI_STATUS_MSG=Execucao agendada iniciada"
+set "KPI_STATUS_MSG=Execucao agendada iniciada"
 call :status starting init
 
 echo.
@@ -68,8 +68,8 @@ call :log "Modo: incremental + epicos filhas (GITLAB_TOKEN em kpi-workspace\.env
 
 if not exist "%PIPELINE_DIR%\pipeline_maestro.py" (
     call :log "ERRO - pipeline_maestro.py nao encontrado"
-    set "MGI_STATUS_MSG=pipeline_maestro.py nao encontrado"
-    set "MGI_EXIT_CODE=1"
+    set "KPI_STATUS_MSG=pipeline_maestro.py nao encontrado"
+    set "KPI_EXIT_CODE=1"
     call :status failed init
     call :finish 1
     exit /b 1
@@ -77,18 +77,18 @@ if not exist "%PIPELINE_DIR%\pipeline_maestro.py" (
 
 cd /d "%PIPELINE_DIR%"
 
-set "MGI_STATUS_MSG=Limpando logs com mais de 7 dias"
+set "KPI_STATUS_MSG=Limpando logs com mais de 7 dias"
 call :status running log_cleanup
 call :log "[PRE] Limpando logs com mais de 7 dias..."
 for /f "usebackq delims=" %%L in (`%PYTHON_EXE% -u -c "from log_maintenance import executar_limpeza_logs; executar_limpeza_logs()" 2^>^&1`) do call :log "%%L"
 
-set "MGI_STATUS_MSG=Acordando WSL Ubuntu"
+set "KPI_STATUS_MSG=Acordando WSL Ubuntu"
 call :status running wsl_wakeup
 call :log "[PRE] Acordando WSL Ubuntu para coleta Git..."
 wsl -d Ubuntu -e true >> "!LOG_FILE!" 2>&1
 timeout /t 2 /nobreak >nul
 
-set "MGI_STATUS_MSG=Sync incremental GitLab para JSON"
+set "KPI_STATUS_MSG=Sync incremental GitLab para JSON"
 call :status running etapa_0_gitlab
 call :stage_banner "ETAPA 0" "GitLab -^> JSON (issues, epicos, mergeado_em)"
 call :run_python atualizar_gitlab_issues.py --incremental
@@ -97,7 +97,7 @@ if errorlevel 1 (
 )
 call :log "[ETAPA 0] Concluida"
 
-set "MGI_STATUS_MSG=Coleta Git, sync Supabase, status_events e snapshot"
+set "KPI_STATUS_MSG=Coleta Git, sync Supabase, status_events e snapshot"
 call :status running etapa_1_maestro
 call :stage_banner "ETAPA 1" "Coleta Git + sync Supabase + status_events + snapshot"
 call :run_python pipeline_maestro.py
@@ -105,7 +105,7 @@ set "RESULT=!ERRORLEVEL!"
 call :log "[ETAPA 1] Concluida"
 
 if !RESULT! equ 0 (
-    set "MGI_STATUS_MSG=Backfill epicos (filhas do grupo)"
+    set "KPI_STATUS_MSG=Backfill epicos (filhas do grupo)"
     call :status running etapa_2_epicos
     call :stage_banner "ETAPA 2" "Backfill epicos --escopo filhas"
     call :run_python backfill_epicos_mergeadas.py --escopo filhas
@@ -122,12 +122,12 @@ call :log "Fim: !date! !time! - codigo !RESULT!"
 call :log "============================================================"
 
 if !RESULT! equ 0 (
-    set "MGI_STATUS_MSG=Pipeline concluido com sucesso"
-    set "MGI_EXIT_CODE=!RESULT!"
+    set "KPI_STATUS_MSG=Pipeline concluido com sucesso"
+    set "KPI_EXIT_CODE=!RESULT!"
     call :status completed done
 ) else (
-    set "MGI_STATUS_MSG=Pipeline concluido com erro"
-    set "MGI_EXIT_CODE=!RESULT!"
+    set "KPI_STATUS_MSG=Pipeline concluido com erro"
+    set "KPI_EXIT_CODE=!RESULT!"
     call :status failed done
 )
 
@@ -165,16 +165,16 @@ set "RUN_EXIT=!ERRORLEVEL!"
 exit /b !RUN_EXIT!
 
 :status
-set "MGI_PIPELINE_STATE=%~1"
-set "MGI_PIPELINE_STAGE=%~2"
-set "MGI_PIPELINE_LOG=!LOG_FILE!"
-if defined MGI_EXIT_CODE (
-    set "MGI_EXIT_CODE=!MGI_EXIT_CODE!"
+set "KPI_PIPELINE_STATE=%~1"
+set "KPI_PIPELINE_STAGE=%~2"
+set "KPI_PIPELINE_LOG=!LOG_FILE!"
+if defined KPI_EXIT_CODE (
+    set "KPI_EXIT_CODE=!KPI_EXIT_CODE!"
 ) else (
-    set "MGI_EXIT_CODE="
+    set "KPI_EXIT_CODE="
 )
 powershell -NoProfile -ExecutionPolicy Bypass -File "!STATUS_PS1!" -SetFromEnv
-set "MGI_EXIT_CODE="
+set "KPI_EXIT_CODE="
 exit /b 0
 
 :finish
@@ -194,7 +194,7 @@ echo  Para consultar depois: verificar_pipeline.bat
 echo  Para acompanhar ao vivo: acompanhar_pipeline.bat
 echo ======================================================================
 echo.
-if defined MGI_PIPELINE_SCHEDULED (
+if defined KPI_PIPELINE_SCHEDULED (
     exit /b %FINAL_CODE%
 )
 echo  Esta janela fecha em 90 segundos ou pressione uma tecla agora.

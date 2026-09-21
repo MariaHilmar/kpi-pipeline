@@ -10,13 +10,30 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+
+def alias_legacy_mgi_env() -> None:
+    """Copia MGI_* para KPI_* quando o prefixo novo ainda nao foi definido.
+
+    Permite .env e Task Scheduler antigos continuarem validos apos a troca de prefixo.
+    """
+    for key, value in list(os.environ.items()):
+        if not key.startswith("MGI_"):
+            continue
+        kpi_key = "KPI_" + key[4:]
+        current = os.environ.get(kpi_key)
+        if current is None or str(current).strip() == "":
+            os.environ[kpi_key] = value
+
+
+alias_legacy_mgi_env()
+
 # ---------------------------------------------------------------------------
 # Helpers de parsing (env vars)
 # ---------------------------------------------------------------------------
 
 
 def _parse_path_repo_pairs(raw: str) -> list[tuple[str, str]]:
-    """Parse MGI_REPOS: path=repo_slug;path2=repo_slug2"""
+    """Parse KPI_REPOS: path=repo_slug;path2=repo_slug2"""
     pairs: list[tuple[str, str]] = []
     for chunk in raw.split(";"):
         chunk = chunk.strip()
@@ -30,7 +47,7 @@ def _parse_path_repo_pairs(raw: str) -> list[tuple[str, str]]:
 
 
 def _parse_repo_path_map(raw: str) -> dict[str, str]:
-    """Parse MGI_WSL_REPO_PATHS: repo_slug=/wsl/path;repo_slug2=/wsl/path2"""
+    """Parse KPI_WSL_REPO_PATHS: repo_slug=/wsl/path;repo_slug2=/wsl/path2"""
     mapping: dict[str, str] = {}
     for chunk in raw.split(";"):
         chunk = chunk.strip()
@@ -47,36 +64,36 @@ def _parse_repo_path_map(raw: str) -> dict[str, str]:
 # Caminhos base
 # ---------------------------------------------------------------------------
 _WORKSPACE_DIR = Path(__file__).resolve().parent.parent
-BASE_DIR: Path = Path(os.environ.get("MGI_BASE_DIR", str(_WORKSPACE_DIR)))
-MGI_DIR: Path = Path(os.environ.get("MGI_PIPELINE_DIR", str(Path(__file__).resolve().parent)))
+BASE_DIR: Path = Path(os.environ.get("KPI_BASE_DIR", str(_WORKSPACE_DIR)))
+KPI_DIR: Path = Path(os.environ.get("KPI_PIPELINE_DIR", str(Path(__file__).resolve().parent)))
 LOGS_DIR: Path = BASE_DIR / "logs"
 
-ISSUES_JSON: Path = Path(os.environ.get("MGI_ISSUES_JSON", str(MGI_DIR / "gitlab_issues_raw.json")))
-EPICS_JSON: Path = Path(os.environ.get("MGI_EPICS_JSON", str(MGI_DIR / "gitlab_epics_raw.json")))
+ISSUES_JSON: Path = Path(os.environ.get("KPI_ISSUES_JSON", str(KPI_DIR / "gitlab_issues_raw.json")))
+EPICS_JSON: Path = Path(os.environ.get("KPI_EPICS_JSON", str(KPI_DIR / "gitlab_epics_raw.json")))
 TIPO_LABELS_JSON: Path = Path(
-    os.environ.get("MGI_TIPO_LABELS_JSON", str(MGI_DIR / "gitlab_tipo_labels_raw.json"))
+    os.environ.get("KPI_TIPO_LABELS_JSON", str(KPI_DIR / "gitlab_tipo_labels_raw.json"))
 )
 GIT_DATA_JSON: Path = Path(
-    os.environ.get("MGI_GIT_DATA_JSON", str(BASE_DIR / "gitlab_git_data.json"))
+    os.environ.get("KPI_GIT_DATA_JSON", str(BASE_DIR / "gitlab_git_data.json"))
 )
 
 # ---------------------------------------------------------------------------
 # Coleta Git
 # ---------------------------------------------------------------------------
 # Caminhos locais dos clones Git (Windows UNC, WSL mount, etc.).
-# Formato: path=repo_slug;path2=repo_slug2  (variavel MGI_REPOS)
-REPOS: list[tuple[str, str]] = _parse_path_repo_pairs(os.environ.get("MGI_REPOS", ""))
+# Formato: path=repo_slug;path2=repo_slug2  (variavel KPI_REPOS)
+REPOS: list[tuple[str, str]] = _parse_path_repo_pairs(os.environ.get("KPI_REPOS", ""))
 
 # Caminhos dentro do WSL usados por git log/show nos detectores Git.
-# Formato: repo_slug=/wsl/path;repo_slug2=/wsl/path2  (variavel MGI_WSL_REPO_PATHS)
+# Formato: repo_slug=/wsl/path;repo_slug2=/wsl/path2  (variavel KPI_WSL_REPO_PATHS)
 _DEFAULT_WSL_REPO_PATHS: dict[str, str] = {
-    "contratos_v2": "/root/MGI/contratos_v2",
-    "contratos": "/root/MGI/contratos",
+    "contratos_v2": "/root/kpi/contratos_v2",
+    "contratos": "/root/kpi/contratos",
 }
 WSL_REPO_PATHS: dict[str, str] = _parse_repo_path_map(
-    os.environ.get("MGI_WSL_REPO_PATHS", "")
+    os.environ.get("KPI_WSL_REPO_PATHS", "")
 ) or dict(_DEFAULT_WSL_REPO_PATHS)
-SINCE_DAYS: int = int(os.environ.get("MGI_SINCE_DAYS", "30"))
+SINCE_DAYS: int = int(os.environ.get("KPI_SINCE_DAYS", "30"))
 
 # ---------------------------------------------------------------------------
 # Processamento de issues
@@ -84,37 +101,37 @@ SINCE_DAYS: int = int(os.environ.get("MGI_SINCE_DAYS", "30"))
 DEFAULT_CUTOFF_DATE: datetime = datetime(2024, 1, 1)
 ALLOWED_MODULES: set[str] = {"Fiscalização", "Fornecedor"}
 # True = inclui todas as issues (qualquer modulo no titulo); False = so ALLOWED_MODULES
-ALL_MODULES: bool = os.environ.get("MGI_ALL_MODULES", "1").lower() not in (
+ALL_MODULES: bool = os.environ.get("KPI_ALL_MODULES", "1").lower() not in (
     "0",
     "false",
     "no",
 )
 # False = apenas atualiza issues ja na planilha, nao insere novas
-ALLOW_NEW_ISSUES: bool = os.environ.get("MGI_ALLOW_NEW_ISSUES", "1").lower() not in (
+ALLOW_NEW_ISSUES: bool = os.environ.get("KPI_ALLOW_NEW_ISSUES", "1").lower() not in (
     "0",
     "false",
     "no",
 )
 # True = nao sobrescreve Módulo / Área Funcional em linhas ja presentes no Excel
-PRESERVE_EXISTING_TAXONOMY: bool = os.environ.get("MGI_PRESERVE_TAXONOMY", "1").lower() not in (
+PRESERVE_EXISTING_TAXONOMY: bool = os.environ.get("KPI_PRESERVE_TAXONOMY", "1").lower() not in (
     "0",
     "false",
     "no",
 )
 # Issues fechadas ha mais de N dias sao excluidas do JSON e do processamento
-CLOSED_EXCLUDE_DAYS: int = int(os.environ.get("MGI_CLOSED_EXCLUDE_DAYS", "60"))
+CLOSED_EXCLUDE_DAYS: int = int(os.environ.get("KPI_CLOSED_EXCLUDE_DAYS", "60"))
 # Carga inicial: inclui todas as issues do JSON, exceto fechadas antigas (60 dias)
 # A data de corte (ex.: 01/01/2024) continua valendo na carga inicial.
-INITIAL_LOAD: bool = os.environ.get("MGI_INITIAL_LOAD", "0").lower() not in (
+INITIAL_LOAD: bool = os.environ.get("KPI_INITIAL_LOAD", "0").lower() not in (
     "0",
     "false",
     "no",
 )
 # Logs e relatorios JSON mais antigos que N dias sao excluidos automaticamente
-LOG_RETENTION_DAYS: int = int(os.environ.get("MGI_LOG_RETENTION_DAYS", "5"))
+LOG_RETENTION_DAYS: int = int(os.environ.get("KPI_LOG_RETENTION_DAYS", "5"))
 
 # Modo de atualizacao: normal (incremental) | full (reprocessa metadados/enriquecimentos)
-REFRESH_MODE: str = os.environ.get("MGI_REFRESH_MODE", "normal").strip().lower()
+REFRESH_MODE: str = os.environ.get("KPI_REFRESH_MODE", "normal").strip().lower()
 
 
 def apply_pipeline_runtime_flags(
@@ -127,13 +144,13 @@ def apply_pipeline_runtime_flags(
     global ALL_MODULES, INITIAL_LOAD, REFRESH_MODE
 
     if initial_load:
-        os.environ["MGI_INITIAL_LOAD"] = "1"
+        os.environ["KPI_INITIAL_LOAD"] = "1"
         INITIAL_LOAD = True
     if all_modules:
-        os.environ["MGI_ALL_MODULES"] = "1"
+        os.environ["KPI_ALL_MODULES"] = "1"
         ALL_MODULES = True
     if full_refresh:
-        os.environ["MGI_REFRESH_MODE"] = "full"
+        os.environ["KPI_REFRESH_MODE"] = "full"
         REFRESH_MODE = "full"
 
 
@@ -209,7 +226,7 @@ def modulo_permitido(module: str) -> bool:
 
 def descricao_filtro_modulos() -> str:
     if ALL_MODULES:
-        return "TODOS os modulos (MGI_ALL_MODULES=1)"
+        return "TODOS os modulos (KPI_ALL_MODULES=1)"
     return ", ".join(sorted(ALLOWED_MODULES))
 
 
@@ -217,7 +234,7 @@ def closed_exclude_days() -> int:
     """Dias para excluir issues fechadas; 0 = incluir todas (carga inicial)."""
     if INITIAL_LOAD:
         return 0
-    raw = os.environ.get("MGI_CLOSED_EXCLUDE_DAYS")
+    raw = os.environ.get("KPI_CLOSED_EXCLUDE_DAYS")
     if raw is not None and str(raw).strip() != "":
         return int(raw)
     return CLOSED_EXCLUDE_DAYS

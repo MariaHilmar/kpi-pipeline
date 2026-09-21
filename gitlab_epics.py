@@ -22,7 +22,7 @@ except ImportError:
 
 EPICS_JSON_FILENAME = "gitlab_epics_raw.json"
 DEFAULT_GROUP_PATH = "comprasnet"
-PARENT_GRAPHQL_BATCH_SIZE = int(os.environ.get("MGI_PARENT_GRAPHQL_BATCH_SIZE", "15"))
+PARENT_GRAPHQL_BATCH_SIZE = int(os.environ.get("KPI_PARENT_GRAPHQL_BATCH_SIZE", "15"))
 _graphql_schema_warned = False
 
 
@@ -108,7 +108,7 @@ def _graphql_post(
             f"{_gitlab_url()}/api/graphql",
             headers=headers,
             json=payload,
-            timeout=float(os.environ.get("MGI_GITLAB_GRAPHQL_TIMEOUT", "30")),
+            timeout=float(os.environ.get("KPI_GITLAB_GRAPHQL_TIMEOUT", "30")),
         )
         if response.status_code in (401, 403):
             return None
@@ -1092,7 +1092,7 @@ def enriquecer_epicos_via_projetos(
         log.warning("AVISO - sem token GitLab para enriquecer epicos via projetos")
         return 0, []
 
-    workers = max(1, min(int(os.environ.get("MGI_GITLAB_EPIC_WORKERS", "12")), 30))
+    workers = max(1, min(int(os.environ.get("KPI_GITLAB_EPIC_WORKERS", "12")), 30))
     log.info(
         f"OK - Buscando epicos via API de projetos para {len(pending)} issues "
         f"({workers} workers)..."

@@ -1,4 +1,4 @@
-# Épicos no GitLab MGI
+# Épicos no GitLab
 
 Este documento registra como o grupo **comprasnet** define épicos no GitLab e
 como o pipeline resolve o campo `issues.epico` no Supabase. Serve de referência
@@ -7,7 +7,7 @@ sem épico.
 
 ## Como o time define épico no GitLab (fonte de verdade)
 
-No GitLab do MGI, o vínculo de uma issue/task com o épico aparece no painel
+No GitLab do projeto, o vínculo de uma issue/task com o épico aparece no painel
 lateral do work item como **Parent** (hierarquia de work items), **não** como
 campo legado "Epic" da API antiga.
 

@@ -54,8 +54,8 @@ def gitlab_work_item_url(repo: str, iid: str) -> str:
 
 
 WSL_REPO_PATHS: dict[str, str] = {
-    "contratos_v2": "/root/MGI/contratos_v2",
-    "contratos": "/root/MGI/contratos",
+    "contratos_v2": "/root/kpi/contratos_v2",
+    "contratos": "/root/kpi/contratos",
 }
 
 

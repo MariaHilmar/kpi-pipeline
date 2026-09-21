@@ -1,4 +1,4 @@
-"""Fixtures compartilhadas para testes do pipeline MGI."""
+"""Fixtures compartilhadas para testes do pipeline KPI."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ import pytest
 # Baseline "como em CI" (sem .env local). Tests que precisem de outro valor
 # devem setá-lo explicitamente (monkeypatch/apply_pipeline_runtime_flags).
 _RUNTIME_ENV_VARS = (
-    "MGI_CLOSED_EXCLUDE_DAYS",
-    "MGI_INITIAL_LOAD",
-    "MGI_ALL_MODULES",
-    "MGI_REFRESH_MODE",
+    "KPI_CLOSED_EXCLUDE_DAYS",
+    "KPI_INITIAL_LOAD",
+    "KPI_ALL_MODULES",
+    "KPI_REFRESH_MODE",
     # Tokens: testes devem ser herméticos (mockar token), não usar o .env do dev.
     "GITLAB_TOKEN",
     "GITLAB_TOKEN_CONTRATOS_V2",
@@ -32,7 +32,7 @@ def _isolate_runtime_state():
     """Isola o estado global por teste (os.environ + flags do módulo config).
 
     A coleta importa módulos que acabam carregando o .env local do desenvolvedor
-    (ex.: MGI_CLOSED_EXCLUDE_DAYS=0) no os.environ global — e config.closed_exclude_days()
+    (ex.: KPI_CLOSED_EXCLUDE_DAYS=0) no os.environ global — e config.closed_exclude_days()
     lê o env em runtime. Sem isolamento, isso muda o comportamento conforme a
     ordem de execução. Aqui forçamos o baseline padrão (como em CI, sem .env) no
     início de cada teste e restauramos o estado original ao final.

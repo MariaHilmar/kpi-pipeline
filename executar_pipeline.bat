@@ -32,7 +32,7 @@ if "%CHOICE%"=="4" (
     exit /b %ERRORLEVEL%
 )
 
-set "MGI_REFRESH_MODE=normal"
+set "KPI_REFRESH_MODE=normal"
 
 echo.
 echo Executando pipeline...
@@ -57,18 +57,18 @@ echo.
 
 echo [ETAPA 1] Coleta Git + sync Supabase + status_events + snapshot diario
 echo ----------------------------------------------------------------------
-set "MGI_STATUS_EVENTS_INCREMENTAL=1"
-set "MGI_SYNC_DAILY_SNAPSHOT=1"
-set "MGI_INITIAL_LOAD=0"
+set "KPI_STATUS_EVENTS_INCREMENTAL=1"
+set "KPI_SYNC_DAILY_SNAPSHOT=1"
+set "KPI_INITIAL_LOAD=0"
 :: RETENCAO: 0 = mantem historico (nao poda fechadas antigas). Alinhado a pipeline.
-set "MGI_CLOSED_EXCLUDE_DAYS=0"
+set "KPI_CLOSED_EXCLUDE_DAYS=0"
 :: HTTP GitLab: timeout baixo + paralelismo (alinhado ao .env e ao agendado).
-set "MGI_GITLAB_HTTP_TIMEOUT=25"
-set "MGI_GITLAB_HTTP_RETRIES=2"
-set "MGI_GITLAB_HTTP_RETRY_DELAY=3"
-set "MGI_GITLAB_MERGE_WORKERS=12"
-set "MGI_GITLAB_EPIC_WORKERS=12"
-set "MGI_GITLAB_GRAPHQL_TIMEOUT=30"
+set "KPI_GITLAB_HTTP_TIMEOUT=25"
+set "KPI_GITLAB_HTTP_RETRIES=2"
+set "KPI_GITLAB_HTTP_RETRY_DELAY=3"
+set "KPI_GITLAB_MERGE_WORKERS=12"
+set "KPI_GITLAB_EPIC_WORKERS=12"
+set "KPI_GITLAB_GRAPHQL_TIMEOUT=30"
 if "%CHOICE%"=="2" (
     "%PYTHON_EXE%" -u pipeline_maestro.py >nul 2>&1
 ) else (

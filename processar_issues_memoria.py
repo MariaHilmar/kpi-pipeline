@@ -69,10 +69,10 @@ def probe_wsl_git_available(timeout_seconds: int = 8) -> bool:
 
 
 def resolve_enable_git(requested: bool = True) -> bool:
-    """True se detectores Git devem rodar (respeita MGI_FAST_REPO_SYNC + repos locais)."""
+    """True se detectores Git devem rodar (respeita KPI_FAST_REPO_SYNC + repos locais)."""
     if not requested:
         return False
-    if os.environ.get("MGI_FAST_REPO_SYNC", "0").lower() not in ("0", "false", "no"):
+    if os.environ.get("KPI_FAST_REPO_SYNC", "0").lower() not in ("0", "false", "no"):
         return False
     if not probe_local_git_repos():
         return False

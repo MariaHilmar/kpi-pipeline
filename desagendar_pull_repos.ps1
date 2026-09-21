@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 param(
-    [string]$TaskName = "MGI-Pull-Repos-Main"
+    [string]$TaskName = "KPI-Pull-Repos-Main"
 )
 
 $colors = @{ Success = "Green"; Error = "Red"; Warning = "Yellow" }
@@ -19,8 +19,14 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 try {
     $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
 } catch {
-    Write-Host "AVISO - Nenhuma tarefa encontrada ($TaskName)" -ForegroundColor $colors.Warning
-    exit 0
+    $found = Get-ScheduledTask -TaskName "MGI-Pull-Repos-Main" -ErrorAction SilentlyContinue
+    if ($found) {
+        $TaskName = "MGI-Pull-Repos-Main"
+        $task = $found
+    } else {
+        Write-Host "AVISO - Nenhuma tarefa encontrada ($TaskName)" -ForegroundColor $colors.Warning
+        exit 0
+    }
 }
 
 Write-Host "Tarefa encontrada: $($task.TaskName) [$($task.State)]"

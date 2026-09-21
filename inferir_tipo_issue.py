@@ -29,10 +29,10 @@ except ImportError:
         return issue.get("gitlab_repo") or "contratos_v2"
 
     def wsl_path_for_repo(repo):
-        return "/root/MGI/contratos_v2" if repo == "contratos_v2" else "/root/MGI/contratos"
+        return "/root/kpi/contratos_v2" if repo == "contratos_v2" else "/root/kpi/contratos"
 
 
-DEFAULT_WSL_REPO = "/root/MGI/contratos_v2"
+DEFAULT_WSL_REPO = "/root/kpi/contratos_v2"
 
 VALID_TIPOS = frozenset({"Bug", "Melhoria", "Performance"})
 

@@ -86,7 +86,7 @@ class TestMultiRepoAreaDetector:
         assert result.confidence == 1.0
 
     def test_inferencia_por_titulo_sem_git(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("MGI_AREA_TITULO_ONLY", "1")
+        monkeypatch.setenv("KPI_AREA_TITULO_ONLY", "1")
         detector = MultiRepoAreaDetector(enabled=True)
         issue = {
             "id": "200",
@@ -97,7 +97,7 @@ class TestMultiRepoAreaDetector:
         assert result.method in ("palavras_chave_titulo", "modulo_canonico_default")
 
     def test_modulo_canonico_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("MGI_AREA_TITULO_ONLY", "1")
+        monkeypatch.setenv("KPI_AREA_TITULO_ONLY", "1")
         detector = MultiRepoAreaDetector(enabled=False)
         issue = {"id": "300", "title": "[Jobs] Atualizar pipeline CI"}
         result = detector.detect(issue)

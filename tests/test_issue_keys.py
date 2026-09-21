@@ -83,7 +83,7 @@ class TestUrlsAndDisplay:
         assert repo_display_name("Contratos v2") == "Contratos v2"
 
     def test_wsl_path_for_repo(self) -> None:
-        assert wsl_path_for_repo("contratos_v2") == "/root/MGI/contratos_v2"
+        assert wsl_path_for_repo("contratos_v2") == "/root/kpi/contratos_v2"
 
 
 class TestSummarizeIssuesByRepo:

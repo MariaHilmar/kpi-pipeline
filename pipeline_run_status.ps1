@@ -13,17 +13,17 @@ if (-not (Test-Path $logsDir)) {
 if ($SetFromEnv) {
     $now = Get-Date -Format 'o'
     $payload = [ordered]@{
-        state      = $env:MGI_PIPELINE_STATE
-        stage      = $env:MGI_PIPELINE_STAGE
-        message    = $env:MGI_STATUS_MSG
+        state      = $env:KPI_PIPELINE_STATE
+        stage      = $env:KPI_PIPELINE_STAGE
+        message    = $env:KPI_STATUS_MSG
         pid        = $PID
-        log_file   = $env:MGI_PIPELINE_LOG
+        log_file   = $env:KPI_PIPELINE_LOG
         updated_at = $now
     }
-    if ($env:MGI_EXIT_CODE) {
-        $payload.exit_code = [int]$env:MGI_EXIT_CODE
+    if ($env:KPI_EXIT_CODE) {
+        $payload.exit_code = [int]$env:KPI_EXIT_CODE
     }
-    if ($env:MGI_PIPELINE_STATE -in @('completed', 'failed')) {
+    if ($env:KPI_PIPELINE_STATE -in @('completed', 'failed')) {
         $payload.finished_at = $now
     }
     $payload | ConvertTo-Json | Set-Content -LiteralPath $statusPath -Encoding utf8
@@ -44,7 +44,12 @@ if (-not (Test-Path $statusPath)) {
 
 Write-Host ''
 Write-Host '--- Agendamento (Task Scheduler) ---'
-$taskNames = @('MGI-Pipeline-Supabase', 'MGI-Pull-Repos-Main')
+$taskNames = @(
+    'KPI-Pipeline-Supabase',
+    'KPI-Pull-Repos-Main',
+    'MGI-Pipeline-Supabase',
+    'MGI-Pull-Repos-Main'
+)
 $expectedBatch = Join-Path $PSScriptRoot 'executar_pipeline_silent.bat'
 foreach ($taskName in $taskNames) {
     $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
@@ -60,7 +65,7 @@ foreach ($taskName in $taskNames) {
     $nextRun = if ($info) { $info.NextRunTime } else { $null }
 
   if ($taskPath -and -not (Test-Path -LiteralPath $taskPath)) {
-        $legacyJunction = 'D:\mgi-workspace'
+        $legacyJunction = 'D:\kpi-workspace'
         if ((Test-Path -LiteralPath $legacyJunction) -and ($taskPath -like "$legacyJunction*")) {
             Write-Host "[$taskName] AVISO - tarefa usa caminho antigo, mas junction existe: $legacyJunction" -ForegroundColor Yellow
             Write-Host "             Rode agendar.bat (admin) para atualizar para: $expectedBatch" -ForegroundColor Yellow

@@ -33,10 +33,10 @@ except ImportError:
         return issue.get("gitlab_repo") or "contratos_v2"
 
     def wsl_path_for_repo(repo):
-        return "/root/MGI/contratos_v2" if repo == "contratos_v2" else "/root/MGI/contratos"
+        return "/root/kpi/contratos_v2" if repo == "contratos_v2" else "/root/kpi/contratos"
 
 
-DEFAULT_WSL_REPO = "/root/MGI/contratos_v2"
+DEFAULT_WSL_REPO = "/root/kpi/contratos_v2"
 DEFAULT_BASE_BRANCH = "master"
 
 FILE_AREA_RULES: Sequence[tuple[str, str]] = (
@@ -247,7 +247,7 @@ class AreaFuncionalDetector:
         if not issue_id:
             return AreaDetection("", "none", 0.0)
 
-        skip_git = os.environ.get("MGI_AREA_TITULO_ONLY", "0").lower() in ("1", "true", "yes")
+        skip_git = os.environ.get("KPI_AREA_TITULO_ONLY", "0").lower() in ("1", "true", "yes")
         if self.enabled and not skip_git:
             files = self._files_for_issue(issue_id)
             area = _infer_area_from_files(files)
@@ -341,7 +341,7 @@ class AreaFuncionalDetector:
 
     def _files_from_branches(self, issue_id: str, branches: list[str]) -> list[str]:
         files: list[str] = []
-        max_branches = int(os.environ.get("MGI_AREA_MAX_BRANCHES", "2"))
+        max_branches = int(os.environ.get("KPI_AREA_MAX_BRANCHES", "2"))
         for branch in branches[:max_branches]:
             for ref in self._branch_refs(branch)[:1]:
                 diff_files = self._run_git(
@@ -379,7 +379,7 @@ class AreaFuncionalDetector:
         if branches:
             files.extend(self._files_from_branches(issue_id, branches))
             files.extend(self._files_from_commit_grep(issue_id))
-        elif os.environ.get("MGI_AREA_SKIP_GIT_GREP", "1").lower() not in ("0", "false", "no"):
+        elif os.environ.get("KPI_AREA_SKIP_GIT_GREP", "1").lower() not in ("0", "false", "no"):
             pass
         else:
             files.extend(self._files_from_commit_grep(issue_id, limited=True))
@@ -492,7 +492,7 @@ class MultiRepoAreaDetector:
         if not issue_id:
             return AreaDetection("", "none", 0.0)
 
-        skip_git = os.environ.get("MGI_AREA_TITULO_ONLY", "0").lower() in ("1", "true", "yes")
+        skip_git = os.environ.get("KPI_AREA_TITULO_ONLY", "0").lower() in ("1", "true", "yes")
         if self.enabled and not skip_git:
             repo = get_gitlab_repo(issue)
             alt_repo = "contratos" if repo == "contratos_v2" else "contratos_v2"

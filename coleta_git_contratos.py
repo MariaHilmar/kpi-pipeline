@@ -23,13 +23,13 @@ except ImportError:
 
     def wsl_path_for_repo(repo: str) -> str:
         paths = {
-            "contratos_v2": "/root/MGI/contratos_v2",
-            "contratos": "/root/MGI/contratos",
+            "contratos_v2": "/root/kpi/contratos_v2",
+            "contratos": "/root/kpi/contratos",
         }
-        return paths.get(repo, "/root/MGI/contratos_v2")
+        return paths.get(repo, "/root/kpi/contratos_v2")
 
 
-WSL_DISTRO = os.environ.get("MGI_WSL_DISTRO", "Ubuntu")
+WSL_DISTRO = os.environ.get("KPI_WSL_DISTRO", "Ubuntu")
 
 
 class GitColeta:
@@ -49,7 +49,7 @@ class GitColeta:
         }
 
     def _run_git(self, git_args: str, timeout: int = 30) -> str:
-        """Executa git dentro do WSL Ubuntu (repos em /root/MGI/...)."""
+        """Executa git dentro do WSL Ubuntu (repos em /root/kpi/...)."""
         cmd = [
             "wsl",
             "-d",
@@ -278,7 +278,7 @@ if __name__ == "__main__":
         DIAS = _cfg.SINCE_DAYS
     except Exception:
         REPOS = []
-        OUTPUT_FILE = r"D:\MGI-Relatórios\gitlab_git_data.json"
+        OUTPUT_FILE = r"D:\kpi-workspace\gitlab_git_data.json"
         DIAS = 30
 
     # Se passado via linha de comando

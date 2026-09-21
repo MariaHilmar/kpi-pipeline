@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manutencao de arquivos de log do pipeline MGI."""
+"""Manutencao de arquivos de log do pipeline KPI."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ DEFAULT_LOG_PATTERNS: tuple[str, ...] = (
 def _retention_days() -> int:
     if config is not None:
         return int(getattr(config, "LOG_RETENTION_DAYS", 7))
-    return int(os.environ.get("MGI_LOG_RETENTION_DAYS", "7"))
+    return int(os.environ.get("KPI_LOG_RETENTION_DAYS", "7"))
 
 
 def _log_directories(base_dir: Path) -> list[Path]:

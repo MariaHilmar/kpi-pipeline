@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
 Lista membros ativos dos projetos GitLab comprasnet/contratos_v2 e comprasnet/contratos
-e cria contas correspondentes no Supabase Auth (dashboard MGI).
+e cria contas correspondentes no Supabase Auth (dashboard KPI).
 
 Uso:
   python provision_gitlab_users.py --dry-run
   python provision_gitlab_users.py --password "<senha-inicial>"
-  # ou defina MGI_PROVISION_PASSWORD no .env (nao commitar)
+  # ou defineste produto_PROVISION_PASSWORD no .env (nao commitar)
 """
 
 from __future__ import annotations
@@ -440,8 +440,8 @@ def _create_supabase_user(
 
 
 def _resolve_provision_password(cli_password: str | None) -> str | None:
-    """Senha obrigatoria para criar contas; aceita CLI ou MGI_PROVISION_PASSWORD."""
-    password = (cli_password or os.environ.get("MGI_PROVISION_PASSWORD", "")).strip()
+    """Senha obrigatoria para criar contas; aceita CLI ou KPI_PROVISION_PASSWORD."""
+    password = (cli_password or os.environ.get("KPI_PROVISION_PASSWORD", "")).strip()
     return password or None
 
 
@@ -451,7 +451,7 @@ def main() -> int:
     parser.add_argument(
         "--password",
         default=None,
-        help="Senha inicial dos novos usuarios (ou MGI_PROVISION_PASSWORD no .env).",
+        help="Senha inicial dos novos usuarios (ou KPI_PROVISION_PASSWORD no .env).",
     )
     args = parser.parse_args()
 
@@ -488,7 +488,7 @@ def main() -> int:
     password = _resolve_provision_password(args.password)
     if not password:
         log.info(
-            "ERRO: informe --password ou defina MGI_PROVISION_PASSWORD no .env "
+            "ERRO: informe --password ou defineste produto_PROVISION_PASSWORD no .env "
             "para provisionar contas."
         )
         return 1

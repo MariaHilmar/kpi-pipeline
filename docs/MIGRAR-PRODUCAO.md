@@ -252,10 +252,10 @@ Peca permissao de administrador quando o Windows perguntar.
 
 | Arquivo no Git | Funcao |
 |----------------|--------|
-| [agendar.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/agendar.bat) | Cria a tarefa **MGI-Pipeline-Supabase**. Roda o silent todos os dias. Horarios padrao: **08:10, 10:00, 12:00, 14:00, 16:00, 18:00**. |
+| [agendar.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/agendar.bat) | Cria a tarefa **KPI-Pipeline-Supabase**. Roda o silent todos os dias. Horarios padrao: **08:10, 10:00, 12:00, 14:00, 16:00, 18:00**. |
 | [desagendar.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/desagendar.bat) | Remove essa tarefa. |
 | [executar_pipeline_silent.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/executar_pipeline_silent.bat) | Pipeline incremental **sem menu**. E o que o agendador dispara. |
-| [agendar_pull_repos.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/agendar_pull_repos.bat) | Agenda pull dos repositorios Git locais (tarefa **MGI-Pull-Repos-Main**). Padrao: dia 1 de cada mes as 09:00. So se houver clones Git/WSL neste PC. |
+| [agendar_pull_repos.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/agendar_pull_repos.bat) | Agenda pull dos repositorios Git locais (tarefa **KPI-Pull-Repos-Main**). Padrao: dia 1 de cada mes as 09:00. So se houver clones Git/WSL neste PC. |
 | [desagendar_pull_repos.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/desagendar_pull_repos.bat) | Remove o agendamento de pull. |
 | [executar_pull_repos.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/executar_pull_repos.bat) | Roda o pull **agora**. |
 | [verificar_pipeline.bat](https://github.com/MariaHilmar/kpi-pipeline/blob/main/verificar_pipeline.bat) | Confere a ultima execucao e o caminho da tarefa. |
@@ -282,14 +282,14 @@ Script PowerShell do agendador: [agendar_task_scheduler.ps1](https://github.com/
 
 O que fica gravado no Windows:
 
-- Tarefa: `MGI-Pipeline-Supabase`  
+- Tarefa: `KPI-Pipeline-Supabase`  
 - Script: `executar_pipeline_silent.bat` (dentro do clone de kpi-pipeline)  
 - Logs: pasta `logs` na **pasta pai** (ao lado dos dois clones)
 
 ### D.3 Conferir se agendou
 
 1. `Win + R`, digite `taskschd.msc`, Enter.  
-2. Procure `MGI-Pipeline-Supabase`.  
+2. Procure `KPI-Pipeline-Supabase`.  
 3. Veja **Next Run Time** e o historico.  
 4. Ou duplo clique em **verificar_pipeline.bat** na pasta do clone.
 

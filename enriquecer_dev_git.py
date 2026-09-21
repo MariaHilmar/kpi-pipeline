@@ -35,10 +35,10 @@ except ImportError:
         return issue.get("gitlab_repo") or DEFAULT_GITLAB_REPO
 
     def wsl_path_for_repo(repo):
-        return "/root/MGI/contratos_v2" if repo == "contratos_v2" else "/root/MGI/contratos"
+        return "/root/kpi/contratos_v2" if repo == "contratos_v2" else "/root/kpi/contratos"
 
 
-DEFAULT_WSL_REPO = "/root/MGI/contratos_v2"
+DEFAULT_WSL_REPO = "/root/kpi/contratos_v2"
 DEFAULT_BASE_BRANCH = "master"
 
 
@@ -244,7 +244,7 @@ class GitDevEnricher:
         return merged
 
     def _author_from_commit_grep(self, issue_id: str) -> tuple[str, str]:
-        if os.environ.get("MGI_DEV_SKIP_GIT_GREP", "1").lower() not in ("0", "false", "no"):
+        if os.environ.get("KPI_DEV_SKIP_GIT_GREP", "1").lower() not in ("0", "false", "no"):
             return "", ""
 
         authors: Counter = Counter()

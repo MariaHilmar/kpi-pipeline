@@ -47,7 +47,7 @@ def test_escreve_no_arquivo_de_log(tmp_path: Path) -> None:
 
 
 def test_nivel_via_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("MGI_LOG_LEVEL", "WARNING")
+    monkeypatch.setenv("KPI_LOG_LEVEL", "WARNING")
     logging_utils._CONFIGURED = False
     logging_utils.configure_logging(force=True)
     assert logging.getLogger().level == logging.WARNING

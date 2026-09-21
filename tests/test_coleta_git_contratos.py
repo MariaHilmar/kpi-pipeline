@@ -9,7 +9,7 @@ import coleta_git_contratos as cgc
 
 def test_validar_repo_usa_wsl():
     coleta = cgc.GitColeta("<path-contratos_v2>", "contratos_v2")
-    assert coleta.wsl_repo_path == "/root/MGI/contratos_v2"
+    assert coleta.wsl_repo_path == "/root/kpi/contratos_v2"
 
     with patch.object(coleta, "_run_git", return_value=".git") as mock_run:
         assert coleta.validar_repo() is True
@@ -35,4 +35,4 @@ def test_run_git_via_wsl_comando():
     mock_sub.assert_called_once()
     cmd = mock_sub.call_args.args[0]
     assert cmd[:5] == ["wsl", "-d", "Ubuntu", "bash", "-lc"]
-    assert "cd /root/MGI/contratos_v2 && git branch --show-current" == cmd[5]
+    assert "cd /root/kpi/contratos_v2 && git branch --show-current" == cmd[5]

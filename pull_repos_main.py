@@ -21,15 +21,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 try:
-    import config as mgi_config
+    import config as kpi_config
     from coleta_git_contratos import GitColeta
 except ImportError as exc:
     print(f"ERRO importando modulos: {exc}")
     sys.exit(1)
 
 DEFAULT_BRANCH = "master"
-FETCH_TIMEOUT = int(os.environ.get("MGI_GIT_PULL_FETCH_TIMEOUT", "120"))
-PULL_TIMEOUT = int(os.environ.get("MGI_GIT_PULL_TIMEOUT", "180"))
+FETCH_TIMEOUT = int(os.environ.get("KPI_GIT_PULL_FETCH_TIMEOUT", "120"))
+PULL_TIMEOUT = int(os.environ.get("KPI_GIT_PULL_TIMEOUT", "180"))
 
 
 @dataclass
@@ -52,7 +52,7 @@ def resolve_pull_branch(coleta: GitColeta, override: str | None = None) -> str:
     if override and override.strip().lower() != "auto":
         return override.strip()
 
-    env_branch = os.environ.get("MGI_GIT_PULL_BRANCH", "").strip()
+    env_branch = os.environ.get("KPI_GIT_PULL_BRANCH", "").strip()
     if env_branch and env_branch.lower() != "auto":
         return env_branch
 
@@ -72,10 +72,10 @@ def resolve_pull_branch(coleta: GitColeta, override: str | None = None) -> str:
 
 
 def _default_repos() -> list[tuple[str, str]]:
-    repos = list(mgi_config.REPOS)
+    repos = list(kpi_config.REPOS)
     if repos:
         return repos
-    return [(path, name) for name, path in mgi_config.WSL_REPO_PATHS.items()]
+    return [(path, name) for name, path in kpi_config.WSL_REPO_PATHS.items()]
 
 
 def pull_repo_main(
@@ -185,7 +185,7 @@ def pull_repo_main(
 def _branch_override(branch: str | None) -> str | None:
     if branch and branch.strip().lower() != "auto":
         return branch.strip()
-    env_branch = os.environ.get("MGI_GIT_PULL_BRANCH", "").strip()
+    env_branch = os.environ.get("KPI_GIT_PULL_BRANCH", "").strip()
     if env_branch and env_branch.lower() != "auto":
         return env_branch
     return None

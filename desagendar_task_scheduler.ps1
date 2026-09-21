@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 param(
-    [string]$TaskName = "MGI-Pipeline-Supabase"
+    [string]$TaskName = "KPI-Pipeline-Supabase"
 )
 
 $colors = @{ Success = "Green"; Error = "Red"; Warning = "Yellow" }
@@ -19,11 +19,20 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 try {
     $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
 } catch {
-    # Tenta nome legado
-    $TaskName = "MGI-Pipeline-Dashboard"
-    try {
-        $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
-    } catch {
+    $found = $null
+    foreach ($legacy in @(
+        "KPI-Pipeline-Dashboard",
+        "MGI-Pipeline-Supabase",
+        "MGI-Pipeline-Dashboard"
+    )) {
+        $found = Get-ScheduledTask -TaskName $legacy -ErrorAction SilentlyContinue
+        if ($found) {
+            $TaskName = $legacy
+            $task = $found
+            break
+        }
+    }
+    if (-not $found) {
         Write-Host "AVISO - Nenhuma tarefa encontrada" -ForegroundColor $colors.Warning
         exit 0
     }

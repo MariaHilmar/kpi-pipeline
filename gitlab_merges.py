@@ -146,9 +146,9 @@ def merged_at_for_issue(
     import requests
 
     if timeout is None:
-        timeout = float(os.environ.get("MGI_GITLAB_HTTP_TIMEOUT", "120"))
+        timeout = float(os.environ.get("KPI_GITLAB_HTTP_TIMEOUT", "120"))
     if retries <= 1:
-        retries = max(1, int(os.environ.get("MGI_GITLAB_HTTP_RETRIES", "3")))
+        retries = max(1, int(os.environ.get("KPI_GITLAB_HTTP_RETRIES", "3")))
 
     if session is None:
         session = requests.Session()
@@ -206,10 +206,10 @@ def enriquecer_issues_com_merge_dates(
     import requests
 
     repo_filter = {_normalize_repo(repo) for repo in (repos or []) if repo and repo.strip()}
-    timeout = float(os.environ.get("MGI_GITLAB_HTTP_TIMEOUT", "120"))
-    retries = max(1, int(os.environ.get("MGI_GITLAB_HTTP_RETRIES", "3")))
-    retry_delay = float(os.environ.get("MGI_GITLAB_HTTP_RETRY_DELAY", "5"))
-    workers = max(1, min(int(os.environ.get("MGI_GITLAB_MERGE_WORKERS", "10")), 30))
+    timeout = float(os.environ.get("KPI_GITLAB_HTTP_TIMEOUT", "120"))
+    retries = max(1, int(os.environ.get("KPI_GITLAB_HTTP_RETRIES", "3")))
+    retry_delay = float(os.environ.get("KPI_GITLAB_HTTP_RETRY_DELAY", "5"))
+    workers = max(1, min(int(os.environ.get("KPI_GITLAB_MERGE_WORKERS", "10")), 30))
 
     source = only_issues if only_issues is not None else issues
     candidatas = []

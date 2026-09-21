@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Agenda execucao diaria do pipeline MGI (GitLab -> Supabase) no Task Scheduler.
+    Agenda execucao diaria do pipeline KPI (GitLab -> Supabase) no Task Scheduler.
 
 .PARAMETER Times
     Horarios diarios no formato HH:mm (padrao 08:10, 10:00, 12:00, 14:00, 16:00, 18:00).
@@ -43,7 +43,7 @@ if (-not $principalCheck.IsInRole([Security.Principal.WindowsBuiltInRole]::Admin
 $WORKSPACE_DIR = Split-Path -Parent $PSScriptRoot
 & (Join-Path $PSScriptRoot "ensure_workspace_compat.ps1") -WorkspaceDir $WORKSPACE_DIR | Out-Null
 $BATCH_FILE = Join-Path $PSScriptRoot "executar_pipeline_silent.bat"
-$TASK_NAME = "MGI-Pipeline-Supabase"
+$TASK_NAME = "KPI-Pipeline-Supabase"
 $RUN_AS_USER = "$env:USERDOMAIN\$env:USERNAME"
 
 Write-Host "Workspace:  $WORKSPACE_DIR"
@@ -56,6 +56,14 @@ Write-Host ""
 if (-not (Test-Path $BATCH_FILE)) {
     Write-Host "ERRO - Arquivo nao encontrado: $BATCH_FILE" -ForegroundColor $colors.Error
     exit 1
+}
+
+foreach ($legacyName in @("MGI-Pipeline-Supabase", "MGI-Pipeline-Dashboard")) {
+    $legacyTask = Get-ScheduledTask -TaskName $legacyName -ErrorAction SilentlyContinue
+    if ($legacyTask) {
+        Unregister-ScheduledTask -TaskName $legacyName -Confirm:$false
+        Write-Host "OK - Tarefa antiga removida: $legacyName" -ForegroundColor $colors.Success
+    }
 }
 
 $existingTask = Get-ScheduledTask -TaskName $TASK_NAME -ErrorAction SilentlyContinue

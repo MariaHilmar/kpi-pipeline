@@ -1,6 +1,6 @@
 @echo off
 REM Pull condicional da main nos repos contratos* (WSL) — agendamento ter/qui 09:00
-REM Tarefa: MGI-Pull-Repos-Main
+REM Tarefa: KPI-Pull-Repos-Main
 setlocal EnableDelayedExpansion
 chcp 65001 >nul
 set "PYTHONIOENCODING=utf-8"
@@ -10,8 +10,8 @@ call "%~dp0_kpi_workspace_dirs.bat"
 if errorlevel 1 exit /b 1
 cd /d "%PROJECT_DIR%"
 set "PYTHON_EXE=python"
-set "MGI_GIT_PULL_BRANCH=auto"
-set "MGI_LOG_RETENTION_DAYS=7"
+set "KPI_GIT_PULL_BRANCH=auto"
+set "KPI_LOG_RETENTION_DAYS=7"
 
 if not exist "%PROJECT_DIR%logs" mkdir "%PROJECT_DIR%logs"
 
@@ -21,7 +21,7 @@ set "LOG_FILE=%PROJECT_DIR%logs\pull_repos_!TS!.log"
 
 echo.
 echo ======================================================================
-echo  MGI - Pull condicional main (contratos*)
+echo  KPI - Pull condicional main (contratos*)
 echo ======================================================================
 echo  Inicio:  !date! !time!
 echo  Log:     !LOG_FILE!
@@ -57,7 +57,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
     "Set-Location -LiteralPath '%PIPELINE_DIR%';" ^
     "$env:PYTHONIOENCODING='utf-8';" ^
     "$env:PYTHONUNBUFFERED='1';" ^
-    "$env:MGI_GIT_PULL_BRANCH='auto';" ^
+    "$env:KPI_GIT_PULL_BRANCH='auto';" ^
     "$out = & '%PYTHON_EXE%' -u pull_repos_main.py 2>&1;" ^
     "$code = $LASTEXITCODE;" ^
     "$out | ForEach-Object { $_; Add-Content -LiteralPath '%LOG_FILE%' -Value $_ -Encoding utf8 };" ^

@@ -45,6 +45,16 @@ def _load_dotenv_early() -> None:
             value = value.strip().strip('"').strip("'")
             if key:
                 os.environ[key] = value
+        try:
+            from config import alias_legacy_mgi_env
+
+            alias_legacy_mgi_env()
+        except ImportError:
+            for key, value in list(os.environ.items()):
+                if key.startswith("MGI_"):
+                    kpi_key = "KPI_" + key[4:]
+                    if not os.environ.get(kpi_key):
+                        os.environ[kpi_key] = value
         return
 
 
@@ -77,11 +87,11 @@ MARCADORES_JSON_SINTETICO = (
 )
 
 SYNC_STATE_FILENAME = "gitlab_issues_sync_state.json"
-DEFAULT_OVERLAP_SECONDS = int(os.environ.get("MGI_SYNC_OVERLAP_SECONDS", "120"))
-DEFAULT_BOOTSTRAP_DAYS = int(os.environ.get("MGI_SYNC_BOOTSTRAP_DAYS", "7"))
-DEFAULT_GITLAB_HTTP_TIMEOUT = int(os.environ.get("MGI_GITLAB_HTTP_TIMEOUT", "120"))
-DEFAULT_GITLAB_HTTP_RETRIES = int(os.environ.get("MGI_GITLAB_HTTP_RETRIES", "3"))
-DEFAULT_GITLAB_HTTP_RETRY_DELAY = float(os.environ.get("MGI_GITLAB_HTTP_RETRY_DELAY", "5"))
+DEFAULT_OVERLAP_SECONDS = int(os.environ.get("KPI_SYNC_OVERLAP_SECONDS", "120"))
+DEFAULT_BOOTSTRAP_DAYS = int(os.environ.get("KPI_SYNC_BOOTSTRAP_DAYS", "7"))
+DEFAULT_GITLAB_HTTP_TIMEOUT = int(os.environ.get("KPI_GITLAB_HTTP_TIMEOUT", "120"))
+DEFAULT_GITLAB_HTTP_RETRIES = int(os.environ.get("KPI_GITLAB_HTTP_RETRIES", "3"))
+DEFAULT_GITLAB_HTTP_RETRY_DELAY = float(os.environ.get("KPI_GITLAB_HTTP_RETRY_DELAY", "5"))
 
 
 def _output_path(output_file: str | None = None) -> Path:
@@ -530,12 +540,12 @@ def atualizar_issues(
     if excluidas:
         log.warning(
             f"AVISO - {excluidas} issues fechadas excluidas do JSON "
-            f"(MGI_CLOSED_EXCLUDE_DAYS={os.environ.get('MGI_CLOSED_EXCLUDE_DAYS', '?')})"
+            f"(KPI_CLOSED_EXCLUDE_DAYS={os.environ.get('KPI_CLOSED_EXCLUDE_DAYS', '?')})"
         )
     else:
         log.info(
             f"OK - Filtro fechadas: nenhuma excluida "
-            f"(MGI_CLOSED_EXCLUDE_DAYS={os.environ.get('MGI_CLOSED_EXCLUDE_DAYS', '?')})"
+            f"(KPI_CLOSED_EXCLUDE_DAYS={os.environ.get('KPI_CLOSED_EXCLUDE_DAYS', '?')})"
         )
 
     if skip_epicos:
@@ -689,7 +699,7 @@ def enriquecer_merge_dates_local(
 
     log.info(
         f"OK - {len(issues)} issues no JSON "
-        f"(MGI_CLOSED_EXCLUDE_DAYS={os.environ.get('MGI_CLOSED_EXCLUDE_DAYS', '?')})"
+        f"(KPI_CLOSED_EXCLUDE_DAYS={os.environ.get('KPI_CLOSED_EXCLUDE_DAYS', '?')})"
     )
     try:
         filled = enriquecer_issues_com_merge_dates(issues, repos=None)

@@ -20,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 try:
-    import config as mgi_config
+    import config as kpi_config
     from atualizar_gitlab_issues import validar_json_local
     from coleta_git_contratos import GitColeta
     from log_maintenance import limpar_logs_antigos
@@ -49,7 +49,7 @@ class PipelineMaestro:
         self.all_modules = all_modules
         self.initial_load = initial_load
         self.full_refresh = full_refresh
-        mgi_config.apply_pipeline_runtime_flags(
+        kpi_config.apply_pipeline_runtime_flags(
             all_modules=all_modules,
             initial_load=initial_load,
             full_refresh=full_refresh,
@@ -83,7 +83,7 @@ class PipelineMaestro:
             git_output = self.output_dir / "gitlab_git_data.json"
 
             # Coleta de multiplos repositorios (configuravel em config.py)
-            repos = mgi_config.REPOS
+            repos = kpi_config.REPOS
 
             dados_consolidados = {
                 "timestamp": datetime.now().isoformat(),
@@ -104,7 +104,7 @@ class PipelineMaestro:
                         dados_consolidados["repositorios"].append(coleta.data)
                         continue
                     coleta.processar_completo(
-                        None, since_days=mgi_config.SINCE_DAYS
+                        None, since_days=kpi_config.SINCE_DAYS
                     )  # None = nao exporta individual
                     dados_consolidados["repositorios"].append(coleta.data)
                     dados_consolidados["total_commits"] += len(coleta.data["commits"])
@@ -155,7 +155,7 @@ class PipelineMaestro:
         self.logger.info("\n[SUPABASE] ETAPA 3: Processamento e sync de Issues")
         self.logger.info("=" * 70)
         try:
-            fast = os.environ.get("MGI_FAST_REPO_SYNC", "0").lower() not in ("0", "false", "no")
+            fast = os.environ.get("KPI_FAST_REPO_SYNC", "0").lower() not in ("0", "false", "no")
             git_enabled = resolve_enable_git(not fast)
             if not fast and not git_enabled:
                 self.logger.warning(
@@ -215,7 +215,7 @@ class PipelineMaestro:
         if self.data_input:
             self.logger.info(f"Data Entrada: {self.data_input}")
         if self.all_modules:
-            self.logger.info("Modo modulos: TODOS (MGI_ALL_MODULES=1)")
+            self.logger.info("Modo modulos: TODOS (KPI_ALL_MODULES=1)")
         if self.initial_load:
             self.logger.info("Modo carga: INICIAL (sem filtro de issues fechadas > 60 dias)")
         if self.full_refresh:
@@ -226,7 +226,7 @@ class PipelineMaestro:
         removed_logs = limpar_logs_antigos(Path(self.output_dir))
         if removed_logs:
             self.logger.info(
-                f"OK - {removed_logs} arquivo(s) de log com mais de {mgi_config.LOG_RETENTION_DAYS} dias removidos"
+                f"OK - {removed_logs} arquivo(s) de log com mais de {kpi_config.LOG_RETENTION_DAYS} dias removidos"
             )
 
         # Validacao
@@ -291,9 +291,9 @@ def main():
     """Funcao principal"""
     configure_logging()
 
-    all_modules = os.environ.get("MGI_ALL_MODULES", "1").lower() not in ("0", "false", "no")
-    initial_load = os.environ.get("MGI_INITIAL_LOAD", "0").lower() not in ("0", "false", "no")
-    full_refresh = mgi_config.is_full_refresh()
+    all_modules = os.environ.get("KPI_ALL_MODULES", "1").lower() not in ("0", "false", "no")
+    initial_load = os.environ.get("KPI_INITIAL_LOAD", "0").lower() not in ("0", "false", "no")
+    full_refresh = kpi_config.is_full_refresh()
     argv = [arg for arg in sys.argv[1:] if arg not in ("--all-modules", "--initial-load", "--full")]
     if "--all-modules" in sys.argv[1:]:
         all_modules = True
@@ -306,11 +306,11 @@ def main():
     data_input = None
 
     # Configuracao padrao (centralizada em config.py / variaveis de ambiente)
-    default_repo_path = mgi_config.REPOS[0][0] if mgi_config.REPOS else ""
+    default_repo_path = kpi_config.REPOS[0][0] if kpi_config.REPOS else ""
     pipeline_config = {
         "repo_path": default_repo_path,
-        "output_dir": str(mgi_config.BASE_DIR),
-        "issues_json_path": str(mgi_config.ISSUES_JSON),
+        "output_dir": str(kpi_config.BASE_DIR),
+        "issues_json_path": str(kpi_config.ISSUES_JSON),
     }
 
     # Permitir override via argumentos

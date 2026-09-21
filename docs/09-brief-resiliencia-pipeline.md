@@ -8,7 +8,7 @@ sem timeouts, sem sobrescrever dados bons no Supabase, com um comando de publica
 Repositorio: `kpi-pipeline` (Python) + `kpi-dashboard` (Next.js) + `supabase/migrations`.
 
 Problema de negocio: pivô **Mergeadas por periodo -> Por epico** no dashboard mostrava "Nao informado".
-Causa raiz: no GitLab MGI, **epico = Parent do work item** (hierarquia), nao so `issue.epic` legado.
+Causa raiz: no GitLab, **epico = Parent do work item** (hierarquia), nao so `issue.epic` legado.
 
 Ja implementado (nao reverter):
 
@@ -40,7 +40,7 @@ Ja implementado (nao reverter):
    - Resumo final (issues sync, epicos ok/fora SB)
 2. **Cliente HTTP GitLab centralizado** (`gitlab_http.py`):
    - `get_json(url, params)`, `post_graphql(query, variables)`
-   - Timeout/retry/backoff via env: `MGI_GITLAB_HTTP_TIMEOUT`, `MGI_GITLAB_HTTP_RETRIES`, `MGI_GITLAB_HTTP_RETRY_DELAY`
+   - Timeout/retry/backoff via env: `KPI_GITLAB_HTTP_TIMEOUT`, `KPI_GITLAB_HTTP_RETRIES`, `KPI_GITLAB_HTTP_RETRY_DELAY`
    - Usado por: `atualizar_gitlab_issues`, `gitlab_epics`, `gitlab_merges`, `audit_epicos_grupo`, `backfill`
 3. **Etapas opcionais / retomaveis**:
    - Estado em `logs/publicacao_state.json` (ultimo repo, ultima etapa ok)

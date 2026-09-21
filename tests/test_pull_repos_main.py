@@ -9,7 +9,7 @@ import pull_repos_main as prm
 
 def _coleta_mock(run_git_side_effect):
     coleta = MagicMock()
-    coleta.wsl_repo_path = "/root/MGI/contratos_v2"
+    coleta.wsl_repo_path = "/root/kpi/contratos_v2"
     coleta.validar_repo.return_value = True
     coleta.run_git.side_effect = run_git_side_effect
     return coleta
@@ -89,7 +89,7 @@ def test_pull_skips_when_diverged():
 
 def test_pull_repo_inacessivel():
     coleta = MagicMock()
-    coleta.wsl_repo_path = "/root/MGI/contratos"
+    coleta.wsl_repo_path = "/root/kpi/contratos"
     coleta.validar_repo.return_value = False
 
     with patch.object(prm, "GitColeta", return_value=coleta):

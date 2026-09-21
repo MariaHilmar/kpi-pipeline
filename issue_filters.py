@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtros de issues para o pipeline MGI."""
+"""Filtros de issues para o pipeline KPI."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def parse_issue_datetime(date_str: str | None) -> datetime | None:
 
 
 def _closed_exclude_days() -> int:
-    raw = os.environ.get("MGI_CLOSED_EXCLUDE_DAYS")
+    raw = os.environ.get("KPI_CLOSED_EXCLUDE_DAYS")
     if raw is not None and str(raw).strip() != "":
         return int(raw)
     if config is not None and hasattr(config, "closed_exclude_days"):

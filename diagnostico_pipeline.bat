@@ -1,6 +1,6 @@
 @echo off
 REM =====================================================================
-REM DIAGNOSTICO - Pipeline MGI (GitLab -> Supabase)
+REM DIAGNOSTICO - Pipeline KPI (GitLab -> Supabase)
 REM =====================================================================
 
 setlocal enabledelayedexpansion
@@ -8,7 +8,7 @@ setlocal enabledelayedexpansion
 color 0E
 echo.
 echo ╔════════════════════════════════════════════════════════════════════╗
-echo ║           DIAGNOSTICO - MGI KPI PIPELINE (Supabase)               ║
+echo ║           DIAGNOSTICO - KPI KPI PIPELINE (Supabase)               ║
 echo ╚════════════════════════════════════════════════════════════════════╝
 echo.
 
@@ -165,9 +165,9 @@ echo Testando WSL...
 wsl --list -v
 echo.
 echo Testando repositorio contratos_v2...
-wsl ls -la /root/MGI/contratos_v2 2>nul
+wsl ls -la /root/kpi/contratos_v2 2>nul
 if errorlevel 1 (
-    echo AVISO - Repositorio /root/MGI/contratos_v2 inacessivel
+    echo AVISO - Repositorio /root/kpi/contratos_v2 inacessivel
 ) else (
     echo OK - Repositorio acessivel
 )

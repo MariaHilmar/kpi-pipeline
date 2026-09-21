@@ -91,7 +91,7 @@ projeto (`#1289`), não o ID global — e grava `gitlab_issues_raw.json`. També
 aciona `gitlab_epics.coletar_e_salvar_epicos` (catalogo do grupo). Requer
 `GITLAB_TOKEN` (global) ou tokens por repo. Detecta JSON sintético/de teste.
 
-> **Épicos no MGI:** na UI GitLab o vínculo é o **Parent** do work item. O sync
+> **Épicos no projeto:** na UI GitLab o vínculo é o **Parent** do work item. O sync
 > resolve via GraphQL em `gitlab_epics.py`. Ver [06-epicos-gitlab.md](06-epicos-gitlab.md).
 
 ### `gitlab_epics.py`
@@ -114,7 +114,7 @@ releases viram linhas em `public.releases`.
 | `inferir_tipo_issue.py` | Infere o **Tipo** da issue (quando não há label `tipo::`). |
 | `enriquecer_dev_git.py` | Enriquecimento **Dev/Git**: branch, commits, e-mail do autor (`%ae`), MRs, mergeado e desenvolvedor resolvido. |
 
-Todos são opcionais: com `MGI_FAST_REPO_SYNC=1` (ou `--sem-git` no
+Todos são opcionais: com `KPI_FAST_REPO_SYNC=1` (ou `--sem-git` no
 `sync_supabase.py`) o processamento usa apenas título e labels.
 
 ## Infraestrutura

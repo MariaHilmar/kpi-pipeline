@@ -1,10 +1,10 @@
-# Garante junction D:\mgi-workspace -> workspace atual (compatibilidade com Task Scheduler antigo).
+# Garante junction D:\kpi-workspace -> workspace atual (compatibilidade com Task Scheduler antigo).
 param(
     [string]$WorkspaceDir = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = 'Stop'
-$legacyPath = 'D:\mgi-workspace'
+$legacyPath = 'D:\kpi-workspace'
 $workspace = (Resolve-Path -LiteralPath $WorkspaceDir).Path
 
 if ($workspace -ieq $legacyPath) {

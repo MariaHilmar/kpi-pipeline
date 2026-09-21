@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Logging central do pipeline MGI.
+"""Logging central do pipeline KPI.
 
 Objetivo: um único ponto de configuração para todo o pipeline, no lugar de
 `print()` espalhado. Mantém o comportamento atual no console (texto puro em
@@ -10,7 +10,7 @@ Uso:
     log = get_logger(__name__)
     log.info("mensagem")
 
-Nível controlado por MGI_LOG_LEVEL (default INFO).
+Nível controlado por KPI_LOG_LEVEL (default INFO).
 """
 
 from __future__ import annotations
@@ -32,11 +32,11 @@ _CONFIGURED = False
 def _logs_dir() -> Path:
     if _config is not None and hasattr(_config, "LOGS_DIR"):
         return Path(_config.LOGS_DIR)
-    return Path(os.environ.get("MGI_LOGS_DIR", "logs"))
+    return Path(os.environ.get("KPI_LOGS_DIR", "logs"))
 
 
 def _level() -> int:
-    name = os.environ.get("MGI_LOG_LEVEL", "INFO").upper()
+    name = os.environ.get("KPI_LOG_LEVEL", "INFO").upper()
     return getattr(logging, name, logging.INFO)
 
 

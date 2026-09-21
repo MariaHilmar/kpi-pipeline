@@ -18,7 +18,7 @@ def test_tipo_de_label_case_insensitive_no_prefixo():
 
 def test_tipo_de_label_ignora_nao_tipo():
     assert tipo_de_label("status::Doing") is None
-    assert tipo_de_label("Equipe::MGI") is None
+    assert tipo_de_label("Equipe::Interna") is None
     assert tipo_de_label("") is None
     assert tipo_de_label("tipo::") is None
 

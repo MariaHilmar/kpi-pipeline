@@ -15,6 +15,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 from datetime import UTC, datetime
@@ -63,6 +64,63 @@ log = get_logger(__name__)
 
 def _utc_now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _supabase_project_ref_from_url(url: str) -> str | None:
+    host = url.strip().rstrip("/").replace("https://", "").replace("http://", "").split("/")[0]
+    if host.endswith(".supabase.co"):
+        return host.removesuffix(".supabase.co")
+    return None
+
+
+def _supabase_project_ref_from_jwt(key: str) -> str | None:
+    if not key.startswith("eyJ") or key.count(".") < 2:
+        return None
+    try:
+        payload = key.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        data = json.loads(base64.urlsafe_b64decode(payload))
+        ref = data.get("ref")
+        return str(ref) if ref else None
+    except (ValueError, json.JSONDecodeError, KeyError, UnicodeDecodeError):
+        return None
+
+
+def resolve_supabase_credentials() -> tuple[str, str]:
+    """URL e chave service_role/secret do .env, com validacao basica de consistencia."""
+    _load_dotenv()
+    url = os.environ.get("SUPABASE_URL", "").strip()
+    key = (
+        os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        or os.environ.get("SUPABASE_SECRET_KEY", "").strip()
+    )
+    if not url or not key:
+        raise SystemExit(
+            "Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) "
+            "em .env na raiz do workspace (kpi-workspace/.env)"
+        )
+
+    url_ref = _supabase_project_ref_from_url(url)
+    key_ref = _supabase_project_ref_from_jwt(key)
+    if url_ref and key_ref and url_ref != key_ref:
+        raise SystemExit(
+            f"SUPABASE_URL aponta para o projeto '{url_ref}', mas a chave service_role "
+            f"pertence a '{key_ref}'. Copie URL e chave do mesmo projeto em "
+            "Supabase → Settings → API."
+        )
+
+    return url, key
+
+
+def _format_supabase_http_error(table: str, status_code: int, detail: str) -> str:
+    if status_code == 401:
+        return (
+            f"Erro Supabase {table} (401): chave API invalida ou revogada. "
+            "Atualize SUPABASE_SERVICE_ROLE_KEY ou SUPABASE_SECRET_KEY em kpi-workspace/.env "
+            "(Supabase → Settings → API → service_role ou Secret key). "
+            f"Detalhe: {detail}"
+        )
+    return f"Erro Supabase {table} ({status_code}): {detail}"
 
 
 def _issues_json_path(explicit: Path | None) -> Path:
@@ -149,6 +207,10 @@ class SupabaseSync:
             "Prefer": "resolution=merge-duplicates,return=minimal",
         }
 
+    def _fail(self, table: str, response: requests.Response) -> None:
+        detail = response.text[:500]
+        raise RuntimeError(_format_supabase_http_error(table, response.status_code, detail))
+
     def upsert_gitlab_users(self, rows: list[dict[str, Any]]) -> int:
         if not rows:
             return 0
@@ -159,8 +221,7 @@ class SupabaseSync:
             timeout=120,
         )
         if not response.ok:
-            detail = response.text[:500]
-            raise RuntimeError(f"Erro Supabase gitlab_users ({response.status_code}): {detail}")
+            self._fail("gitlab_users", response)
         return len(rows)
 
     def replace_issue_participants(self, issue_keys: list[str], rows: list[dict[str, Any]]) -> int:
@@ -659,13 +720,7 @@ def sync_issues_to_supabase(
     """Processa issues em memoria e sincroniza com o Supabase (sem Excel).
 
     Se ``issues`` for None, carrega de ``json_path`` (ou config.ISSUES_JSON)."""
-    _load_dotenv()
-    url = os.environ.get("SUPABASE_URL", "").strip()
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-    if not url or not key:
-        raise SystemExit(
-            "Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY em .env na raiz do workspace (kpi-workspace/.env)"
-        )
+    url, key = resolve_supabase_credentials()
 
     if issues is None:
         path = _issues_json_path(json_path)

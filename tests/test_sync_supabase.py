@@ -216,7 +216,30 @@ def test_sync_issues_to_supabase_erro_no_upsert(monkeypatch: pytest.MonkeyPatch)
 def test_sync_issues_to_supabase_sem_credenciais(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    monkeypatch.delenv("SUPABASE_SECRET_KEY", raising=False)
     monkeypatch.setattr(s, "_load_dotenv", lambda: None)
 
     with pytest.raises(SystemExit):
         s.sync_issues_to_supabase([_sample_issue()], enable_git=False, include_releases=False)
+
+
+def test_resolve_supabase_credentials_rejeita_url_e_jwt_de_projetos_diferentes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(s, "_load_dotenv", lambda: None)
+    monkeypatch.setenv("SUPABASE_URL", "https://projeto-a.supabase.co")
+    monkeypatch.setenv(
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByb2pldG8tYiIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjAsImV4cCI6MH0."
+        "sig",
+    )
+
+    with pytest.raises(SystemExit, match="projeto-a"):
+        s.resolve_supabase_credentials()
+
+
+def test_format_supabase_http_error_401_inclui_orientacao() -> None:
+    msg = s._format_supabase_http_error("gitlab_users", 401, '{"message":"invalid"}')
+    assert "401" in msg
+    assert "SUPABASE_SERVICE_ROLE_KEY" in msg

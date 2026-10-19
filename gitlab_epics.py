@@ -922,7 +922,7 @@ def preencher_epicos_filhas_no_supabase(
                 seen_links.add(key)
                 stats["links"].append(link_row)
 
-            rows = requests.get(
+            lookup = requests.get(
                 f"{base}/issues",
                 headers=headers,
                 params={
@@ -932,8 +932,15 @@ def preencher_epicos_filhas_no_supabase(
                     "limit": 1,
                 },
                 timeout=60,
-            ).json()
-            if not rows:
+            )
+            if not lookup.ok:
+                log.warning(
+                    f"AVISO - lookup issue {repo}#{iid} falhou ({lookup.status_code}): "
+                    f"{lookup.text[:200]}"
+                )
+                continue
+            rows = lookup.json()
+            if not isinstance(rows, list) or not rows:
                 epic_stats["fora_sb"] += 1
                 stats["fora_sb"] += 1
                 stats["fora_sb_list"].append(
